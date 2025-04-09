@@ -1,0 +1,665 @@
+/* =========================
+   Global Branding Variables
+   ========================= */
+:root {
+  /* Core Palette */
+  --brand-primary: #4facfe;
+  --brand-secondary: #00f2fe;
+  --brand-success: #66bb6a;
+  --brand-info: #29b6f6;
+  --brand-warning: #ffa726;
+  --brand-danger: #ef5350;
+
+  /* Backgrounds */
+  --background-gradient: linear-gradient(135deg, #1c1c1c, #121212);
+  --background-primary: #1c1c1c;
+  --background-secondary: #121212;
+  --surface-color: #2a2a2a;
+  --container-bg: #222;
+  --card-bg: #333;
+  --input-bg: #333;
+  --input-border: #555;
+  --timer-bar-bg: #444;
+
+  /* Text Colors */
+  --text-primary: #f0f0f0;
+  --text-secondary: #ccc;
+  --text-muted: #888;
+  --heading-color: #fff;
+  --subheading-color: #ddd;
+  --penalty-color: #ff8a80;
+
+  /* Buttons */
+  --button-gradient: linear-gradient(135deg, var(--brand-primary), var(--brand-secondary));
+  --button-hover-gradient: linear-gradient(135deg, #00c6ff, var(--brand-primary));
+  --button-disabled-bg: #555;
+  --button-use-card-gradient: linear-gradient(135deg, var(--brand-info), #00c6ff);
+  --button-delete-gradient: linear-gradient(135deg, var(--brand-danger), #e53935);
+
+  /* Font */
+  --font-family: 'Inter', sans-serif;
+
+  /* Shadows */
+  --shadow-strong: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-medium: 0 4px 12px rgba(0,0,0,0.3);
+  --shadow-light: 0 4px 10px rgba(0,0,0,0.3);
+
+  /* Border Radius */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --radius-xs: 6px;
+
+  /* Spacing */
+  --spacing-lg: 20px;
+  --spacing-md: 15px;
+  --spacing-sm: 10px;
+}
+
+/* =========================
+   Reset and Base Styles
+   ========================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--background-gradient);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  padding: 40px 20px;
+}
+
+/* =========================
+   Container
+   ========================= */
+.container {
+  background-color: var(--container-bg);
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  max-width: 1000px;
+  width: 100%;
+  box-shadow: var(--shadow-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+
+/* =========================
+   Typography
+   ========================= */
+h1 {
+  font-size: 2.2em;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 10px;
+  color: var(--heading-color);
+}
+
+h2 {
+  font-size: 1.5em;
+  font-weight: 600;
+  margin-bottom: 15px;
+  border-bottom: 2px solid #444;
+  padding-bottom: 8px;
+  color: var(--heading-color);
+}
+
+h3 {
+  font-size: 1.2em;
+  font-weight: 500;
+  margin-bottom: 10px;
+  color: var(--subheading-color);
+}
+
+/* =========================
+   Sections
+   ========================= */
+.section {
+  background-color: var(--surface-color);
+  border-radius: var(--radius-md);
+  padding: 20px;
+  box-shadow: var(--shadow-medium);
+}
+
+/* =========================
+   General Stats Display
+   ========================= */
+#general-stats-display {
+  background: var(--card-bg);
+  padding: 12px 20px;
+  border-radius: var(--radius-sm);
+  font-size: 1.1em;
+  text-align: center;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+/* =========================
+   Lists
+   ========================= */
+ul {
+  list-style: none;
+}
+
+#task-list li,
+#product-list li,
+#user-stats-list li {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow-light);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Restore flex column layout for stats and products */
+#user-stats-list li,
+#product-list li {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+
+/* New task card layout */
+.task-card-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+}
+
+.task-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  flex-grow: 1;
+  gap: 6px;
+}
+
+.task-name {
+  font-size: 1.1em;
+  font-weight: 600;
+  color: var(--heading-color);
+}
+
+.task-time {
+  font-size: 0.95em;
+  color: var(--text-secondary);
+}
+
+.task-best-time {
+  font-size: 0.85em;
+  color: var(--text-muted);
+}
+
+.task-desc {
+  font-size: 0.95em;
+  color: var(--text-secondary);
+}
+
+.task-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 10px;
+}
+
+.task-actions button {
+  padding: 6px 10px;
+  font-size: 1em;
+  border-radius: var(--radius-xs);
+  min-width: 36px;
+  min-height: 36px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.task-actions button.delete {
+  align-self: flex-end;
+  font-size: 1.2em;
+  padding: 4px 8px;
+}
+
+.task-actions button.start-task-btn {
+  font-size: 1.2em;
+}
+
+#task-list li:hover,
+#product-list li:hover,
+#user-stats-list li:hover,
+#inventory-list li:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.6);
+}
+
+#task-list .task-details,
+#product-list span,
+#user-stats-list .stat-details {
+  flex-grow: 1;
+  color: var(--heading-color);
+}
+
+#user-stats-list {
+  display: flex;
+  flex-direction: row;
+  gap: 15px;
+  overflow-x: auto;
+}
+
+#user-stats-section iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 350px;
+  border: none;
+}
+
+#user-stats-list .stat-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 150px;
+  align-items: center;
+  text-align: center;
+}
+
+#user-stats-list .stat-level {
+  opacity: 0.6;
+  font-size: 0.9em;
+}
+
+#user-stats-list .stat-name {
+  font-size: 1.2em;
+  font-weight: 600;
+}
+
+#user-stats-list .stat-xp {
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+#user-stats-list .stat-details > div {
+  width: 100%;
+}
+
+#user-stats-list .stat-details > div:last-child {
+  margin-top: auto;
+}
+
+#inventory-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+#inventory-list li {
+  background-color: var(--card-bg);
+  border-radius: var(--radius-md);
+  padding: 15px;
+  box-shadow: var(--shadow-light);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 250px;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+.card-icon {
+  font-size: 2em;
+}
+
+.card-details {
+  text-align: center;
+}
+
+.card-name {
+  font-weight: 500;
+  color: var(--heading-color);
+  font-size: 1.1em;
+}
+
+.card-desc {
+  color: var(--text-secondary);
+  font-size: 0.9em;
+  max-height: 4.5em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+}
+
+.card-desc.expanded {
+  max-height: none;
+  -webkit-line-clamp: unset;
+}
+
+/* =========================
+   Buttons
+   ========================= */
+button {
+  background: var(--button-gradient);
+  color: var(--heading-color);
+  border: none;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 1em;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+  background: var(--button-hover-gradient);
+}
+
+button:disabled {
+  background: var(--button-disabled-bg);
+  cursor: not-allowed;
+  box-shadow: none;
+  transform: none;
+  opacity: 0.6;
+}
+
+button.use-card {
+  background: var(--button-use-card-gradient);
+}
+
+button.delete {
+  background: var(--button-delete-gradient);
+}
+
+button.use-card:hover,
+button.delete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+}
+
+/* =========================
+   Forms and Inputs
+   ========================= */
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+  background-color: var(--input-bg);
+  border: 1px solid var(--input-border);
+  border-radius: var(--radius-xs);
+  padding: 10px;
+  color: #eee;
+  font-size: 1em;
+  transition: border-color 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--brand-primary);
+  outline: none;
+}
+
+/* Fix form layouts */
+#task-management .controls,
+.add-product-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+#task-management .controls > div,
+.add-product-form > div {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 200px;
+  gap: 6px;
+}
+
+#task-management label,
+.add-product-form label {
+  font-size: 0.95em;
+  color: var(--text-secondary);
+}
+
+#task-management button,
+.add-product-form button {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-top: 10px;
+}
+
+/* =========================
+   Product List
+   ========================= */
+#product-list img {
+  width: 50px;
+  height: 50px;
+  border-radius: var(--radius-xs);
+  object-fit: cover;
+  margin-right: 10px;
+}
+
+#product-list li {
+  align-items: center;
+}
+
+#product-list span {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+#product-list button {
+  flex-shrink: 0;
+}
+
+/* =========================
+   Task Runner
+   ========================= */
+#task-runner {
+  text-align: center;
+}
+
+#timer-display {
+  font-size: 3em;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: var(--heading-color);
+}
+
+.timer-bar-container {
+  background-color: var(--timer-bar-bg);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  height: 25px;
+  margin-bottom: 20px;
+  border: 1px solid var(--input-border);
+}
+
+.timer-bar {
+  background: linear-gradient(90deg, var(--brand-success), var(--brand-primary));
+  height: 100%;
+  width: 100%;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+/* =========================
+   Penalties
+   ========================= */
+#active-penalty-section {
+  text-align: center;
+  font-weight: 500;
+  color: var(--penalty-color);
+}
+
+.penalty-active {
+  color: var(--brand-warning);
+  font-weight: bold;
+}
+
+/* =========================
+   Utility Classes
+   ========================= */
+.hidden {
+  display: none !important;
+}
+
+/* =========================
+   Media Queries
+   ========================= */
+@media (max-width: 768px) {
+  body {
+    padding: 20px 10px;
+  }
+
+  .container {
+    padding: 20px;
+    gap: 20px;
+  }
+
+  h1 {
+    font-size: 1.8em;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  .section {
+    padding: 15px;
+  }
+
+  #task-management .controls,
+  .add-product-form {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+  }
+
+  #task-management .controls button,
+  .add-product-form button {
+    width: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px;
+  }
+
+  h1 {
+    font-size: 1.5em;
+  }
+
+  h2 {
+    font-size: 1.2em;
+  }
+
+  .section {
+    padding: 10px;
+  }
+}
+
+/* =========================
+   Modal Overlay and Content
+   ========================= */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  box-shadow: var(--shadow-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  color: #fff;
+}
+
+/* =========================
+   Stat Card and Delete Button
+   ========================= */
+.stat-card {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.delete-stat-btn {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.stat-details-container {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+}
+
+.stat-details-container .xp-bar {
+  background: #444;
+  border-radius: 6px;
+  overflow: hidden;
+  height: 12px;
+  width: 100%;
+  margin-top: auto;
+}
+
+.stat-details-container .xp-bar-fill {
+  background: linear-gradient(90deg, #4facfe, #00f2fe);
+  height: 100%;
+}
