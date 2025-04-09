@@ -1,0 +1,1286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Habit Challenge RPG - Dark Glass</title>
+    <!-- Import a modern font (optional, but recommended) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="game.css">
+</head>
+<body>
+    <!-- Existing HTML Structure -->
+    <div class="container">
+        <h1>Habit Challenge RPG</h1>
+
+        <div class="general-stats" id="general-stats-display">Coins: 0 | Base XP per Task: 15</div>
+
+        <!-- User Stats Section -->
+        <div id="user-stats-section" class="section">
+            <h2>Character Stats</h2>
+            <ul id="user-stats-list">
+                <!-- JS Populated -->
+                 <li>No stats created yet. Add one below!</li>
+            </ul>
+            <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-sm); align-items: flex-end;">
+                 <div style="flex-grow: 1;">
+                     <label for="new-stat-name">New Stat Name:</label>
+                     <input type="text" id="new-stat-name" placeholder="e.g., Focus" style="width: 100%;">
+                 </div>
+                 <button id="add-stat-btn">Add Stat</button>
+            </div>
+            <iframe id="spider-graph-iframe" src="spider-graph.html" frameborder="0" width="100%" height="350"></iframe>
+        </div>
+
+        <!-- Task Runner Section (Initially Hidden) -->
+        <div id="task-runner" class="section hidden">
+            <h2 id="task-runner-name">Running Task...</h2>
+            <div class="task-timer">
+                <span id="timer-display">00:00</span>
+                <div class="timer-bar-container">
+                    <div id="timer-bar" class="timer-bar"></div>
+                </div>
+                <!-- Group control buttons together -->
+                <div>
+                    <button id="complete-task-early-btn" class="use-card">Complete Task Now</button>
+                    <button id="fail-task-btn" class="delete">Fail Task (Debug)</button>
+                </div>
+                 <!-- Ghost run display could go here -->
+            </div>
+        </div>
+
+        <!-- Active Penalty Section -->
+        <div id="active-penalty-section" class="section hidden">
+            <h2>Next Task Penalty</h2>
+            <p id="active-penalty-display" class="penalty-active"></p>
+        </div>
+
+        <!-- Active Penalties Window -->
+        <div id="active-penalties-window" class="section">
+            <h2>Active Penalties</h2>
+            <ul id="active-penalties-list">
+                <!-- Populated dynamically -->
+            </ul>
+        </div>
+
+        <!-- Task Management Section -->
+        <div id="task-management" class="section">
+            <h2>Manage Tasks</h2>
+            <div class="controls">
+                <button id="show-add-task-popup">+ Add Task</button>
+            </div>
+
+            <div class="form-popup hidden" id="add-task-popup">
+                <h3>Create New Task</h3>
+                <div>
+                    <label for="new-task-name">Task Name:</label>
+                    <input type="text" id="new-task-name" placeholder="Enter task name">
+                </div>
+                <div>
+                    <label for="new-task-time">Time (s):</label>
+                    <input type="number" id="new-task-time" placeholder="Min 10s" min="10">
+                </div>
+                <div>
+                    <label for="new-task-stat">Assign Stat XP:</label>
+                    <select id="new-task-stat">
+                        <option value="">None</option>
+                        <!-- Stat options will be populated here -->
+                    </select>
+                </div>
+                <div>
+                    <label for="new-task-desc">Description:</label>
+                    <textarea id="new-task-desc" placeholder="Enter task description"></textarea>
+                </div>
+                <div>
+                    <label for="new-task-xp">XP Reward:</label>
+                    <input type="number" id="new-task-xp" placeholder="XP for completing task" min="0">
+                </div>
+                <button id="add-task-btn">Add Task</button>
+                <button id="close-add-task-popup">Close</button>
+            </div>
+            <ul id="task-list">
+                 <!-- JS Populated -->
+                <li>No tasks added yet.</li>
+            </ul>
+        </div>
+
+        <!-- Inventory Section -->
+        <div id="inventory-section" class="section">
+            <h2>Reward Card Inventory</h2>
+            <ul id="inventory-list">
+                 <!-- JS Populated -->
+            </ul>
+            <p id="inventory-empty" class="hidden">Your inventory is empty.</p>
+        </div>
+
+        <!-- Store Section -->
+        <div id="store-section" class="section">
+            <h2>Store</h2>
+            <button id="show-add-product-popup" style="margin-bottom: 15px;">+ Add Product</button>
+
+            <div class="form-popup hidden" id="add-product-popup">
+                <h3>Add New Product</h3>
+                <div>
+                    <label for="new-product-name">Name:</label>
+                    <input type="text" id="new-product-name" placeholder="Product Name">
+                </div>
+                <div>
+                    <label for="new-product-description">Description:</label>
+                    <textarea id="new-product-description" placeholder="Product Description"></textarea>
+                </div>
+                <div>
+                    <label for="new-product-image">Image URL:</label>
+                    <input type="text" id="new-product-image" placeholder="Image URL">
+                </div>
+                <div>
+                    <label for="new-product-price">Price:</label>
+                    <input type="number" id="new-product-price" placeholder="Price">
+                </div>
+                <button id="add-product-btn">Add Product</button>
+                <button id="close-add-product-popup">Close</button>
+            </div>
+
+            <h3 style="margin-top: 20px;">Available Products</h3>
+            <ul id="product-list">
+                <!-- Products will be populated here -->
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- Card Task Selection Modal -->
+    <div id="card-task-modal" class="hidden modal-overlay">
+      <div class="modal-content">
+        <h3>Select a Task for this Card</h3>
+        <div id="card-task-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;"></div>
+        <button id="cancel-card-task-btn" style="background: #555;">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Existing JavaScript (no changes needed here for styling) -->
+    <script>
+        
+        class HabitGame {
+    constructor() {
+        this.hoverSound = new Audio('hover.mp3');
+        this.hoverSound.volume = 1.0;
+        this.winSound = new Audio('win.mp3');
+        this.winSound.volume = 1.0;
+        this.loseSound = new Audio('lose.mp3');
+        this.loseSound.volume = 1.0;
+        this.timerSound = new Audio('timer.mp3');
+        this.timerSound.loop = true;
+        this.timerSound.volume = 0;
+
+        this.dom = {
+                    generalStatsDisplay: document.getElementById('general-stats-display'),
+                    taskRunner: document.getElementById('task-runner'),
+                    taskRunnerName: document.getElementById('task-runner-name'),
+                    timerDisplay: document.getElementById('timer-display'),
+                    timerBar: document.getElementById('timer-bar'),
+                    completeTaskEarlyBtn: document.getElementById('complete-task-early-btn'),
+                    failTaskBtn: document.getElementById('fail-task-btn'),
+                    activePenaltySection: document.getElementById('active-penalty-section'),
+                    activePenaltyDisplay: document.getElementById('active-penalty-display'),
+                    taskManagement: document.getElementById('task-management'),
+                    newTaskName: document.getElementById('new-task-name'),
+                    newTaskTime: document.getElementById('new-task-time'),
+                    newTaskStat: document.getElementById('new-task-stat'), // New select element
+                    addTaskBtn: document.getElementById('add-task-btn'),
+                    taskList: document.getElementById('task-list'),
+                    inventorySection: document.getElementById('inventory-section'),
+                    inventoryList: document.getElementById('inventory-list'),
+                    inventoryEmpty: document.getElementById('inventory-empty'),
+                    userStatsSection: document.getElementById('user-stats-section'), // New Stats Section
+                    userStatsList: document.getElementById('user-stats-list'),     // New Stats List
+                    newStatName: document.getElementById('new-stat-name'),       // New Stat Input
+                    addStatBtn: document.getElementById('add-stat-btn'),         // New Stat Button
+                    newProductName: document.getElementById('new-product-name'),
+                    newProductDescription: document.getElementById('new-product-description'),
+                    newProductImage: document.getElementById('new-product-image'),
+                    newProductPrice: document.getElementById('new-product-price'),
+                    addProductBtn: document.getElementById('add-product-btn'),
+                    productList: document.getElementById('product-list')
+                };
+
+                // --- Configuration ---
+                this.config = {
+                    baseXpPerTask: 15, // Base XP awarded for tasks (before multipliers/tiers)
+                    baseCoinsPerTask: 10,
+                    statBaseXpForLevel2: 100, // XP needed to get from level 1 to level 2
+                    statXpLevelMultiplier: 1.5 // How much harder each level gets (1.5 means 50% more XP than the previous level)
+                };
+
+                this.state = {
+                    tasks: [], // { id, name, baseTime, bestTime, statId }
+                    inventory: [], // { id, name, type, description, effect?, multiplier? }
+                    generalStats: { coins: 0 }, // Only coins for now
+                    userStats: [], // { id, name, level, xp, xpToNextLevel } <--- NEW
+                    activePenalty: null, // { type, description, value?, immediate?, nextTask?, effect? }
+                    activeTask: null, // { taskId, startTime, timerId, timeLimit, cardUsed, initialTimeLimit }
+                    cardToUseOnNext: {}, // { taskId: cardId }
+                    products: [] // { id, name, description, image, price }
+                };
+
+                this.rewardCardTypes = [
+                    { type: 'EXTRA_TIME_ACE', name: 'Extra Time Ace', emoji: '⏰', description: 'Gain an extra 30 seconds to complete your task.', effect: (limit) => limit + 30, power: 2 },
+                    { type: 'TIME_JACKPOT', name: 'Time Jackpot', emoji: '🎰', description: 'Hit the jackpot! +60 seconds bonus time.', effect: (limit) => limit + 60, power: 3 },
+                    { type: 'DOUBLE_XP', name: 'Double Down XP', emoji: '✨', description: 'Double the XP earned for this task.', multiplier: { xp: 2 }, power: 3 },
+                    { type: 'DOUBLE_COINS', name: 'High Roller Coins', emoji: '💰', description: 'Double the coins earned for this task.', multiplier: { coins: 2 }, power: 3 },
+                    { type: 'INSURANCE', name: 'Insurance Policy', emoji: '🛡️', description: 'Negate any penalty if you fail this task.', power: 4 },
+                    { type: 'TRIPLE_XP', name: 'Triple Threat XP', emoji: '🔥', description: 'Triple the XP earned for this task.', multiplier: { xp: 3 }, power: 5 },
+                    { type: 'COIN_MAGNET', name: 'Coin Magnet', emoji: '🧲', description: 'Earn 50% more coins for this task.', multiplier: { coins: 1.5 }, power: 2 },
+                    { type: 'TIME_REWIND', name: 'Time Rewind', emoji: '⏪', description: 'Adds 15 seconds back once when timer drops below 10 seconds.', special: 'timeRewind', power: 4 },
+                    { type: 'LUCKY_STREAK', name: 'Lucky Streak', emoji: '🍀', description: '25% chance to double all rewards for this task.', special: 'luckyStreak', power: 3 },
+                    { type: 'COMBO_CHAIN', name: 'Combo Chain', emoji: '🔗', description: 'Next reward card effect is doubled.', special: 'comboChain', power: 5 },
+                ];
+
+                this.penaltyTypes = [
+                    { type: 'BAD_BEAT', name: 'Bad Beat', emoji: '💥', description: 'Lose a random reward card from your inventory.', immediate: true, severity: 2 },
+                    { type: 'LET_IT_RIDE', name: 'Let It Ride', emoji: '🔄', description: 'You must immediately retry the same task.', immediate: true, severity: 3 },
+                    { type: 'TIME_CRUNCH', name: 'Time Crunch', emoji: '⏳', description: 'Next task has 25% less time.', nextTask: true, effect: (limit) => limit * 0.75, severity: 2 },
+                    { type: 'BEAT_THE_CLOCK', name: 'Beat The Clock', emoji: '⏱️', description: 'Next task loses 15 seconds.', nextTask: true, effect: (limit) => Math.max(10, limit - 15), severity: 2 },
+                    { type: 'HALF_COINS', name: 'Half Coins', emoji: '🪙', description: 'Next task earns 50% fewer coins.', nextTask: true, penaltyMultiplier: { coins: 0.5 }, severity: 2 },
+                    { type: 'XP_DRAIN', name: 'XP Drain', emoji: '🩸', description: 'Next task earns 50% less XP.', nextTask: true, penaltyMultiplier: { xp: 0.5 }, severity: 2 },
+                    { type: 'TIME_BOMB', name: 'Time Bomb', emoji: '💣', description: 'Next task timer reduced by 20%.', nextTask: true, effect: (limit) => limit * 0.8, severity: 3 },
+                    { type: 'CURSE_OF_DOUBT', name: 'Curse of Doubt', emoji: '🧿', description: '25% chance to nullify all rewards on next task.', nextTask: true, special: 'curseOfDoubt', severity: 4 },
+                    { type: 'DOUBLE_TROUBLE', name: 'Double Trouble', emoji: '⚠️', description: 'Next penalty effect is doubled.', nextTask: true, special: 'doubleTrouble', severity: 5 },
+                ];
+
+                this.loadState();
+                this.bindEvents();
+                this.render();
+            }
+
+            // --- Store Management ---
+            addProduct() {
+                const name = this.dom.newProductName.value.trim();
+                const description = this.dom.newProductDescription.value.trim();
+                const image = this.dom.newProductImage.value.trim();
+                const priceInput = this.dom.newProductPrice.value;
+
+                if (!name || !description || !image || !priceInput) {
+                    alert('Please fill in all product details.');
+                    return;
+                }
+
+                const price = parseInt(priceInput, 10);
+
+                if (isNaN(price) || price < 0) {
+                    alert('Please provide a valid price.');
+                    return;
+                }
+
+                const newProduct = {
+                    id: `product_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    name: name,
+                    description: description,
+                    image: image,
+                    price: price
+                };
+
+                this.state.products.push(newProduct);
+                this.dom.newProductName.value = '';
+                this.dom.newProductDescription.value = '';
+                this.dom.newProductImage.value = '';
+                this.dom.newProductPrice.value = '';
+                this.saveState();
+                this.renderProducts();
+                
+            }
+
+            renderProducts() {
+                this.dom.productList.innerHTML = '';
+                if (this.state.products.length === 0) {
+                    this.dom.productList.innerHTML = '<li>No products available.</li>';
+                    return;
+                }
+
+                this.state.products.forEach(product => {
+                    const li = document.createElement('li');
+                    li.dataset.productId = product.id;
+                    li.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px;">
+                        <span>${product.name} - ${product.description} - ${product.price} coins</span>
+                        <button data-product-id="${product.id}" class="buy-product-btn">Buy</button>
+                    `;
+                    this.dom.productList.appendChild(li);
+                });
+            }
+
+            buyProduct(productId) {
+                const product = this.state.products.find(p => p.id === productId);
+                if (!product) {
+                    alert('Product not found.');
+                    return;
+                }
+
+                if (this.state.generalStats.coins < product.price) {
+                    alert('Not enough coins.');
+                    return;
+                }
+
+                this.state.generalStats.coins -= product.price;
+                this.saveState();
+                this.renderGeneralStats();
+                alert(`Bought ${product.name} for ${product.price} coins.`);
+            }
+
+            // --- State Management ---
+            loadState() {
+                const savedState = localStorage.getItem('habitGameState_v2'); // Use new key for safety
+                if (savedState) {
+                    const parsed = JSON.parse(savedState);
+                    // Basic validation and default values
+                    this.state.tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+                    this.state.inventory = Array.isArray(parsed.inventory) ? parsed.inventory : [];
+                    this.state.generalStats = typeof parsed.generalStats === 'object' && parsed.generalStats !== null ? parsed.generalStats : { coins: 0 };
+                    this.state.userStats = Array.isArray(parsed.userStats) ? parsed.userStats : []; // Load user stats
+                    this.state.activePenalty = typeof parsed.activePenalty === 'object' ? parsed.activePenalty : null; // Can be null
+                    this.state.cardToUseOnNext = typeof parsed.cardToUseOnNext === 'object' && parsed.cardToUseOnNext !== null ? parsed.cardToUseOnNext : {};
+                }
+                 // Ensure numeric types after loading and calculate XP to next level if missing
+                 this.state.tasks.forEach(t => {
+                    t.baseTime = Number(t.baseTime || 0);
+                    t.bestTime = t.bestTime ? Number(t.bestTime) : null;
+                 });
+                 this.state.userStats.forEach(s => {
+                     s.level = Number(s.level || 1);
+                     s.xp = Number(s.xp || 0);
+                     // Recalculate XP to next level on load to ensure it's correct based on current config
+                     s.xpToNextLevel = this.calculateXpToNextLevel(s.level);
+                 });
+                 // Ensure general stats has coins
+                 this.state.generalStats.coins = Number(this.state.generalStats.coins || 0);
+
+                 // Clean up any invalid cardToUseOnNext entries (e.g., if task was deleted)
+                 const validTaskIds = new Set(this.state.tasks.map(t => t.id));
+                 Object.keys(this.state.cardToUseOnNext).forEach(taskId => {
+                     if (!validTaskIds.has(taskId)) {
+                         delete this.state.cardToUseOnNext[taskId];
+                     }
+                 });
+            }
+
+            saveState() {
+                 // Filter out temporary runtime state like activeTask timerId before saving
+                 const stateToSave = {
+                    tasks: this.state.tasks,
+                    inventory: this.state.inventory,
+                    generalStats: this.state.generalStats,
+                    userStats: this.state.userStats,
+                    activePenalty: this.state.activePenalty,
+                    cardToUseOnNext: this.state.cardToUseOnNext, // Save card selections
+                 };
+                localStorage.setItem('habitGameState_v2', JSON.stringify(stateToSave));
+            }
+
+            // --- Stat Management ---
+            addStat() {
+                const name = this.dom.newStatName.value.trim();
+                if (!name) {
+                    alert('Please enter a name for the stat.');
+                    return;
+                }
+                if (this.state.userStats.some(stat => stat.name.toLowerCase() === name.toLowerCase())) {
+                    alert('A stat with this name already exists.');
+                    return;
+                }
+
+                const newStat = {
+                    id: `stat_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    name: name,
+                    level: 1,
+                    xp: 0,
+                    xpToNextLevel: this.calculateXpToNextLevel(1)
+                };
+                this.state.userStats.push(newStat);
+                this.dom.newStatName.value = '';
+                this.saveState();
+                this.render(); // Re-render to update UI including task dropdown
+                
+            }
+
+            deleteStat(statId) {
+                const statIndex = this.state.userStats.findIndex(s => s.id === statId);
+                if (statIndex === -1) return;
+                const statName = this.state.userStats[statIndex].name;
+
+                if (confirm(`Are you sure you want to delete the stat "${statName}"? Tasks linked to it will no longer grant XP for it.`)) {
+                    this.state.userStats.splice(statIndex, 1);
+                    // Update tasks linked to this stat
+                    this.state.tasks.forEach(task => {
+                        if (task.statId === statId) {
+                            task.statId = null; // Or remove property: delete task.statId;
+                             
+                        }
+                    });
+                    this.saveState();
+                    this.render();
+                    
+                }
+            }
+
+            calculateXpToNextLevel(level) {
+                 // XP_for_level = Base * Multiplier^(Level - 1)
+                 return Math.floor(this.config.statBaseXpForLevel2 * Math.pow(this.config.statXpLevelMultiplier, level - 1));
+            }
+
+            addXpToStat(statId, amount) {
+                 if (!statId || amount <= 0) return;
+                 const stat = this.state.userStats.find(s => s.id === statId);
+                 if (!stat) {
+                     console.warn(`Attempted to add XP to non-existent stat ID: ${statId}`);
+                     return;
+                 }
+
+                 
+                 stat.xp += amount;
+                 let leveledUp = false;
+                 let needsSave = true; // Assume save is needed unless only display updates
+
+                 // Check for level ups
+                 while (stat.xp >= stat.xpToNextLevel) {
+                     stat.xp -= stat.xpToNextLevel;
+                     stat.level++;
+                     stat.xpToNextLevel = this.calculateXpToNextLevel(stat.level);
+                     leveledUp = true;
+                     
+                     // Consider showing a more noticeable level-up notification
+                     // For now, alert is functional:
+                     alert(`${stat.name} reached Level ${stat.level}!`);
+                 }
+
+                 if (leveledUp) {
+                    this.saveState(); // Save state only if a level up occurred
+                    this.renderUserStats(); // Re-render the whole stats list if level changed
+                 } else if (amount > 0) {
+                    // Optimization: If only XP changed within the level, just update that specific stat's display
+                    this.renderSpecificUserStat(statId);
+                    // Small optimization: Could defer saveState() until task completion if needed,
+                    // but saving here ensures progress isn't lost if browser crashes mid-task.
+                    this.saveState();
+                 }
+            }
+
+
+            // --- Core Game Logic ---
+            addTask() {
+                const name = this.dom.newTaskName.value.trim();
+                const baseTimeInput = this.dom.newTaskTime.value;
+                const selectedStatId = this.dom.newTaskStat.value || null; // Get selected stat ID
+                const description = document.getElementById('new-task-desc').value.trim();
+                const xpInput = document.getElementById('new-task-xp').value;
+                const xpReward = parseInt(xpInput, 10);
+
+                if (!name) {
+                     alert('Please provide a task name.');
+                     return;
+                }
+                if (!baseTimeInput) {
+                     alert('Please provide a task time.');
+                     return;
+                }
+
+                const baseTime = parseInt(baseTimeInput, 10);
+
+                if (isNaN(baseTime) || baseTime < 10) {
+                    alert('Please provide a valid time (minimum 10 seconds).');
+                    return;
+                }
+
+                const newTask = {
+                    id: `task_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    name: name,
+                    description: description,
+                    baseTime: baseTime,
+                    xpReward: isNaN(xpReward) ? this.config.baseXpPerTask : xpReward,
+                    bestTime: null,
+                    statId: selectedStatId // Store the linked stat ID
+                };
+                this.state.tasks.push(newTask);
+                this.dom.newTaskName.value = '';
+                this.dom.newTaskTime.value = '';
+                this.dom.newTaskStat.value = ''; // Reset dropdown
+                document.getElementById('new-task-desc').value = '';
+                this.saveState();
+                this.renderTasks(); // Only render tasks list
+                
+            }
+
+            deleteTask(taskId) {
+                if (this.state.activeTask && this.state.activeTask.taskId === taskId) {
+                    alert("Cannot delete a task while it's running!");
+                    return;
+                }
+                 const taskIndex = this.state.tasks.findIndex(task => task.id === taskId);
+                 if (taskIndex === -1) return; // Task not found
+
+                 const taskName = this.state.tasks[taskIndex].name;
+
+                 if (confirm(`Are you sure you want to delete the task "${taskName}"?`)) {
+                    this.state.tasks.splice(taskIndex, 1);
+                    delete this.state.cardToUseOnNext[taskId]; // Remove any pending card selection
+                    this.saveState();
+                    this.renderTasks(); // Only render tasks list
+                    
+                 }
+            }
+
+            selectCardForTask(cardId, taskId) {
+                const card = this.state.inventory.find(c => c.id === cardId);
+                const task = this.state.tasks.find(t => t.id === taskId);
+                if (!card || !task) return;
+
+                // Clear any existing selection for this task
+                Object.keys(this.state.cardToUseOnNext).forEach(key => {
+                     if (key === taskId) delete this.state.cardToUseOnNext[key];
+                });
+                 this.state.cardToUseOnNext[taskId] = cardId;
+                 // No saveState here - selection is temporary until task starts or another selection is made
+                 this.renderTasks(); // Re-render tasks to show "(Card Ready)"
+                 this.renderInventory(); // Might want to disable the button for the selected card
+                 alert(`Card "${card.name}" ready for the next run of task "${task.name}". Start the task to use it.`);
+            }
+
+            startTask(taskId) {
+                if (this.state.activeTask) {
+                    alert('Another task is already running!');
+                    return;
+                }
+                const task = this.state.tasks.find(t => t.id === taskId);
+                if (!task) return;
+
+                this.timerSound.currentTime = 0;
+                this.timerSound.volume = 0;
+                this.timerSound.play().catch(() => {});
+
+                let timeLimit = task.baseTime;
+                let cardUsed = null;
+                const cardIdToUse = this.state.cardToUseOnNext[taskId];
+                let cardDef = null; // Define cardDef outside the if block
+
+                // 1. Apply Active Penalty (if any affects the *next* task)
+if (this.state.activePenalty && this.state.activePenalty.nextTask) {
+    const penaltyDef = this.penaltyTypes.find(p => p.type === this.state.activePenalty.type);
+    if (penaltyDef?.effect) {
+        const originalTime = timeLimit;
+        timeLimit = Math.max(10, Math.floor(penaltyDef.effect(timeLimit)));
+        
+        alert(`Penalty applied: ${this.state.activePenalty.name}\n${this.state.activePenalty.description}\nTime reduced from ${originalTime}s to ${timeLimit}s`);
+    }
+    this.state.activePenalty = null; // Consumed
+    // saveState will happen later, renderActivePenalty will be called by full render
+}
+
+                // 2. Apply Selected Reward Card
+                 if (cardIdToUse) {
+                    const cardIndex = this.state.inventory.findIndex(c => c.id === cardIdToUse);
+                    if (cardIndex > -1) {
+                        cardUsed = { ...this.state.inventory[cardIndex] }; // Store a copy
+                        cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type); // Assign cardDef here
+
+                        if (cardDef?.effect) { // Time modification
+                            const originalTime = timeLimit;
+                            timeLimit = Math.max(10, Math.floor(cardDef.effect(timeLimit)));
+                             
+                        } else { // Other effects (multipliers, insurance) handled at completion
+                             
+                        }
+
+                        this.state.inventory.splice(cardIndex, 1); // Consume card
+                        delete this.state.cardToUseOnNext[taskId]; // Clear selection state
+                        // saveState will happen later, renderInventory will be called by full render
+                    } else {
+                         console.warn(`Card ID ${cardIdToUse} selected but not found in inventory.`);
+                         delete this.state.cardToUseOnNext[taskId]; // Clear invalid selection
+                    }
+                 }
+
+                // Store initial time limit for progress bar calculation
+                const initialTimeLimitForBar = timeLimit;
+
+                this.state.activeTask = {
+                    taskId: task.id,
+                    startTime: Date.now(),
+                    timerId: null,
+                    timeLimit: timeLimit, // Current time limit after modifications
+                    initialTimeLimit: initialTimeLimitForBar, // Time limit used for progress bar %
+                    cardUsed: cardUsed // Store the used card details
+                };
+
+                this.dom.taskRunnerName.textContent = `Running: ${task.name}`;
+                // Visibility toggled by render()
+
+                this.runTimer();
+                this.saveState(); // Save state now (includes consumed penalty/card, active task details minus timerId)
+                this.render(); // Full render to update UI state (hide sections, disable buttons, show timer)
+            }
+
+            runTimer() {
+                if (!this.state.activeTask) return;
+                // Destructure directly from this.state.activeTask for safety if it becomes null
+                const { timerId } = this.state.activeTask;
+                if (timerId) clearInterval(timerId); // Clear previous interval if any (safety)
+
+                const intervalId = setInterval(() => {
+                    // Check if task is still active inside interval, crucial for async safety
+                    if (!this.state.activeTask) {
+                        clearInterval(intervalId);
+                        
+                        return;
+                    }
+                    const { startTime, timeLimit, initialTimeLimit } = this.state.activeTask;
+
+                    const elapsed = (Date.now() - startTime) / 1000;
+                    const remaining = Math.max(0, timeLimit - elapsed);
+                    // Progress based on the initial time limit when the timer started
+                    const progress = initialTimeLimit > 0 ? Math.max(0, Math.min(100, (remaining / initialTimeLimit) * 100)) : 0;
+
+                    this.updateTimerDisplay(remaining, progress);
+
+                    if (remaining <= 0) {
+                        // Task time ran out naturally
+                        
+                        // Clear interval *before* calling completeTask to prevent race conditions
+                        clearInterval(intervalId);
+                        this.state.activeTask.timerId = null; // Update state
+                        this.completeTask(false); // Time ran out = failure
+                    }
+                }, 100); // Update ~10 times per second
+
+                // Update the activeTask state with the new timerId
+                if (this.state.activeTask) {
+                   this.state.activeTask.timerId = intervalId;
+                } else {
+                   // If activeTask became null between start and here, clear the just-created interval
+                   clearInterval(intervalId);
+                   console.warn("Active task became null immediately after timer creation.");
+                }
+            }
+
+            updateTimerDisplay(remainingSeconds, progressPercent) {
+                const minutes = Math.floor(remainingSeconds / 60);
+                const seconds = Math.floor(remainingSeconds % 60);
+                this.dom.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+                // Fade in timer sound volume as time decreases
+                const fadeDuration = 100; // seconds
+                let volume = 0;
+                if (remainingSeconds < fadeDuration) {
+                    volume = 1 - (remainingSeconds / fadeDuration);
+                    volume = Math.min(Math.max(volume, 0), 1);
+                }
+                this.timerSound.volume = volume;
+
+                // Update bar width
+                this.dom.timerBar.style.width = `${progressPercent}%`;
+
+                // Update bar color based on progress (optional gradient effect stays)
+                if (progressPercent < 25) {
+                    this.dom.timerBar.style.background = 'var(--color-danger)';
+                } else if (progressPercent < 50) {
+                    this.dom.timerBar.style.background = 'var(--color-warning)';
+                } else {
+                    // Reset to default gradient if needed, or keep single color
+                     this.dom.timerBar.style.background = 'linear-gradient(90deg, var(--color-success) 0%, var(--accent-primary) 100%)';
+                }
+            }
+
+            completeTask(success) {
+                this.timerSound.pause();
+                this.timerSound.currentTime = 0;
+                if (success) {
+                    this.winSound.currentTime = 0;
+                    this.winSound.play().catch(() => {});
+                } else {
+                    this.loseSound.currentTime = 0;
+                    this.loseSound.play().catch(() => {});
+                }
+
+                if (!this.state.activeTask) {
+                     console.warn("completeTask called but no active task found.");
+                     return;
+                }
+
+                const { taskId, startTime, timerId, cardUsed } = this.state.activeTask;
+                if(timerId) clearInterval(timerId); // Ensure timer is stopped
+
+                const task = this.state.tasks.find(t => t.id === taskId);
+                if (!task) {
+                     console.error(`Task with ID ${taskId} not found during completion.`);
+                     this.state.activeTask = null; // Clear broken active task state
+                     this.saveState();
+                     this.render();
+                     return;
+                }
+
+                const timeTaken = Math.max(0, (Date.now() - startTime) / 1000); // Ensure non-negative time
+
+                // --- Rewards & Penalties ---
+                let finalCoins = 0;
+                let finalStatXp = 0;
+                let message = '';
+
+                if (success) {
+                    // --- Success Logic ---
+                    const baseCoins = this.config.baseCoinsPerTask;
+                    const baseXp = this.config.baseXpPerTask; // Base XP for the *stat*
+
+                    let coinMultiplier = 1;
+                    let xpMultiplier = 1;
+
+                    // Apply card multipliers
+                    if (cardUsed) {
+                         const cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type);
+                         if (cardDef?.multiplier) {
+                            coinMultiplier = cardDef.multiplier.coins || coinMultiplier;
+                            xpMultiplier = cardDef.multiplier.xp || xpMultiplier; // Stat XP multiplier
+                            
+                         }
+                    }
+
+                    // Calculate Performance Tier & Bonus
+                    const baseTaskTime = task.baseTime;
+                    let tier = 'Bronze'; // Default tier
+                    let bonusCoins = 0;
+                    let bonusXp = 0; // Bonus Stat XP
+
+                    // Tier calculation based on time taken relative to base time
+                    if (timeTaken < baseTaskTime * 0.5) { tier = 'Gold'; bonusCoins = 20; bonusXp = 30; }
+                    else if (timeTaken < baseTaskTime * 0.75) { tier = 'Silver'; bonusCoins = 10; bonusXp = 15; }
+                    else { tier = 'Bronze'; bonusCoins = 5; bonusXp = 5; } // Base Bronze bonus
+
+                    // Apply multipliers to bonuses as well
+                    bonusCoins = Math.floor(bonusCoins * coinMultiplier);
+                    bonusXp = Math.floor(bonusXp * xpMultiplier);
+
+                    // Calculate final amounts
+                    finalCoins = Math.floor(baseCoins * coinMultiplier) + bonusCoins;
+                    finalStatXp = Math.floor(baseXp * xpMultiplier) + bonusXp;
+
+                    // Grant rewards
+                    this.state.generalStats.coins += finalCoins;
+                    if (task.statId && finalStatXp > 0) {
+                        this.addXpToStat(task.statId, finalStatXp); // This handles its own rendering/saving for the stat part
+                    } else if (finalStatXp > 0) {
+                        
+                    }
+
+                    // Update Best Time
+                    if (task.bestTime === null || timeTaken < task.bestTime) {
+                        task.bestTime = timeTaken;
+                        
+                    }
+
+                    // Grant random reward card on success
+                    this.grantRandomRewardCard();
+
+                    // Prepare success message
+                    message = `Task Success! (${tier})\nTime: ${timeTaken.toFixed(1)}s\nEarned: +${finalCoins} Coins, +${finalStatXp} Stat XP.`;
+                    
+
+
+                } else {
+                     // --- Failure Logic ---
+                    let penaltyApplied = true;
+                    let failureMessage = `Task Failed! Time: ${timeTaken.toFixed(1)}s.`;
+
+                    if (cardUsed && cardUsed.type === 'INSURANCE') {
+                        failureMessage += '\nInsurance Policy used: Penalty negated.';
+                        
+                        penaltyApplied = false;
+                         // Optionally grant a small consolation prize even with insurance?
+                         // const consolationCoins = Math.floor(this.config.baseCoinsPerTask * 0.2);
+                         // this.state.generalStats.coins += consolationCoins;
+                         // failureMessage += `\n+${consolationCoins} consolation coins.`;
+                    }
+
+                    if (penaltyApplied) {
+                         // Apply penalty and get its description for the message
+                         const penaltyDescription = this.applyRandomPenalty(taskId); // Pass taskId for 'Let It Ride'
+                         if (penaltyDescription) {
+                             failureMessage += `\nPenalty: ${penaltyDescription}`;
+                         } else {
+                             failureMessage += "\nNo penalty applied (e.g., no cards to lose).";
+                         }
+                    }
+                    message = failureMessage;
+                }
+
+                // Cleanup
+                this.state.activeTask = null;
+
+                // Save state *after* all modifications from success/failure are done
+                this.saveState();
+                // Render the UI to reflect the changes (hide timer, show sections, update stats/inventory)
+                this.render();
+
+                // Show result message *after* render to ensure UI is updated
+                 if (message) {
+                    alert(message);
+                 }
+            }
+
+            grantRandomRewardCard() {
+                 if (this.rewardCardTypes.length === 0) return; // No cards defined
+
+                 const randomCardType = this.rewardCardTypes[Math.floor(Math.random() * this.rewardCardTypes.length)];
+                 const newCard = {
+                    id: `card_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                    ...randomCardType // Spread properties from the type definition
+                 };
+                 this.state.inventory.push(newCard);
+                 
+                 // No save/render needed here, called within completeTask which handles it
+                 // Optional: Show a less intrusive notification than alert
+                 // e.g., append a temporary message to a notifications area
+            }
+
+            applyRandomPenalty(failedTaskId = null) {
+                const possiblePenalties = this.penaltyTypes;
+                if (possiblePenalties.length === 0) return null; // No penalties defined
+
+                const penalty = { ...possiblePenalties[Math.floor(Math.random() * possiblePenalties.length)] }; // Get a copy
+                
+                let appliedDescription = `${penalty.name}! ${penalty.description}`; // Base description
+
+                if (penalty.immediate) {
+                    if (penalty.type === 'BAD_BEAT') {
+                        if (this.state.inventory.length > 0) {
+                            const removedIndex = Math.floor(Math.random() * this.state.inventory.length);
+                            const removedCard = this.state.inventory.splice(removedIndex, 1)[0];
+                            appliedDescription += ` Lost: ${removedCard.name}`;
+                            
+                            // RenderInventory will be handled by the calling completeTask function's final render
+                        } else {
+                             appliedDescription += ' (Inventory empty, no card lost).';
+                             
+                        }
+                    } else if (penalty.type === 'LET_IT_RIDE' && failedTaskId) {
+                        appliedDescription += ' Retrying task immediately.';
+                        
+                        // Use setTimeout to allow the current execution context (completeTask) to finish
+                        // before starting the new task. This prevents potential state issues.
+                        setTimeout(() => {
+                             
+                             this.startTask(failedTaskId);
+                        }, 50); // Small delay
+                         // No state save here, startTask will handle it.
+                         // Return description, the retry happens after this function returns.
+                         return appliedDescription;
+                    }
+                    // If immediate penalty applied something, return description
+                    return appliedDescription;
+
+                } else if (penalty.nextTask) {
+                    this.state.activePenalty = penalty; // Store the penalty object
+                    
+                    // renderActivePenalty will be handled by completeTask's final render
+                    return appliedDescription; // Return description to be shown in alert
+                }
+
+                // Should not reach here if penalty types are correctly defined
+                console.warn("Penalty type not handled:", penalty.type);
+                return null; // Return null if no specific action taken
+            }
+
+            // --- UI Rendering ---
+            render() {
+                
+                const isTaskActive = !!this.state.activeTask;
+
+                // Render static/list parts first
+                this.renderGeneralStats();
+                this.renderUserStats(); // Render the new stats section
+                this.populateStatDropdown(); // Ensure dropdown is up-to-date
+                this.renderTasks(isTaskActive); // Pass active state to disable buttons correctly
+                this.renderInventory(isTaskActive); // Pass active state
+                this.renderActivePenalty(isTaskActive); // Pass active state
+                this.renderProducts();
+
+                // Toggle main section visibility based on whether a task is active
+                this.dom.taskManagement.classList.toggle('hidden', isTaskActive);
+                this.dom.inventorySection.classList.toggle('hidden', isTaskActive);
+                this.dom.userStatsSection.classList.toggle('hidden', isTaskActive);
+                this.dom.taskRunner.classList.toggle('hidden', !isTaskActive);
+
+                 // Ensure specific elements within task runner are reset/updated if needed
+                 if (!isTaskActive) {
+                    // Reset timer display when no task is active
+                    this.updateTimerDisplay(0, 100); // Show 00:00, full bar (or hide bar)
+                 }
+            }
+
+            renderGeneralStats() {
+                 // Added Base Stat XP display
+                 this.dom.generalStatsDisplay.textContent = `Coins: ${this.state.generalStats.coins} | Base Stat XP: ${this.config.baseXpPerTask}`;
+            }
+
+            renderUserStats() {
+                this.dom.userStatsList.innerHTML = ''; // Clear list
+                if (this.state.userStats.length === 0) {
+                    // Use a more informative placeholder if needed, or keep simple
+                    this.dom.userStatsList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No stats created yet. Add one below.</li>';
+                    return;
+                }
+                // Sort stats alphabetically for consistency
+                const sortedStats = [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name));
+                sortedStats.forEach(stat => {
+                    this.appendOrUpdateStatElement(stat);
+                });
+
+                // Send stats to spider graph iframe
+                const spiderGraphIframe = document.getElementById('spider-graph-iframe');
+                if (spiderGraphIframe && spiderGraphIframe.contentWindow) {
+                    const statsForGraph = this.state.userStats.map(stat => ({
+                        name: stat.name,
+                        level: stat.level
+                    }));
+                    spiderGraphIframe.contentWindow.postMessage({
+                        type: 'updateSpiderGraph',
+                        stats: statsForGraph
+                    }, '*');
+                }
+            }
+
+            renderSpecificUserStat(statId) {
+                 const stat = this.state.userStats.find(s => s.id === statId);
+                 if(stat) {
+                    this.appendOrUpdateStatElement(stat);
+                 } else {
+                    console.warn(`Tried to render specific stat ${statId}, but it was not found.`);
+                 }
+            }
+
+                         // Helper to add or update a single stat's list item (for efficiency)
+            appendOrUpdateStatElement(stat) {
+                let li = this.dom.userStatsList.querySelector(`li[data-stat-id="${stat.id}"]`);
+                const xpProgress = stat.xpToNextLevel > 0 ? Math.round((stat.xp / stat.xpToNextLevel) * 100) : (stat.level > 1 ? 100 : 0);
+
+                const statDetailsHTML = `
+                    <div class="stat-card">
+                        <button data-stat-id="${stat.id}" class="delete-stat-btn" ${this.state.activeTask ? 'disabled' : ''} title="Delete Stat ${stat.name}">&times;</button>
+                        <div class="stat-details-container">
+                            <div class="stat-level">Lvl ${stat.level}</div>
+                            <div class="stat-name">${stat.name}</div>
+                            <div class="stat-xp">(${stat.xp} / ${stat.xpToNextLevel} XP - ${xpProgress}%)</div>
+                            <div class="xp-bar">
+                                <div class="xp-bar-fill" style="width: ${xpProgress}%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                if (li) {
+                    li.innerHTML = statDetailsHTML;
+                    const button = li.querySelector('.delete-stat-btn');
+                    if (button) button.disabled = !!this.state.activeTask;
+                } else {
+                    li = document.createElement('li');
+                    li.dataset.statId = stat.id;
+                    li.innerHTML = statDetailsHTML;
+                    this.dom.userStatsList.appendChild(li);
+                }
+            }
+
+            renderTasks(isTaskActive) { // Accept active state as parameter
+                this.dom.taskList.innerHTML = ''; // Clear list
+                if (this.state.tasks.length === 0) {
+                    this.dom.taskList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No tasks added yet.</li>';
+                    return;
+                }
+
+                // Sort tasks alphabetically
+                 const sortedTasks = [...this.state.tasks].sort((a, b) => a.name.localeCompare(b.name));
+
+                sortedTasks.forEach(task => {
+                    const li = document.createElement('li');
+                    li.dataset.taskId = task.id; // Add task id to li for easier selection if needed later
+
+                    const linkedStat = task.statId ? this.state.userStats.find(s => s.id === task.statId) : null;
+                    const linkedStatName = linkedStat ? linkedStat.name : 'None';
+                    const cardReadyText = this.state.cardToUseOnNext[task.id] ? ' (Card Ready)' : '';
+                    const bestTimeText = task.bestTime ? ` - Best: ${task.bestTime.toFixed(1)}s` : '';
+                    const descriptionText = task.description ? `<div class="task-desc">${task.description}</div>` : '';
+
+                    li.innerHTML = `
+                        <div class="task-card-content">
+                          <div class="task-info">
+                            <div class="task-name">${task.name}</div>
+                            <div class="task-time">Time: ${task.baseTime}s</div>
+                            ${bestTimeText ? `<div class="task-best-time">${bestTimeText}</div>` : ''}
+                            <div class="task-desc">${descriptionText}</div>
+                          </div>
+                          <div class="task-actions">
+                            <button data-task-id="${task.id}" class="delete delete-task-btn" ${isTaskActive ? 'disabled' : ''} title="Delete Task ${task.name}">&#10006;</button>
+                            <button data-task-id="${task.id}" class="start-task-btn" ${isTaskActive ? 'disabled' : ''} title="Start Task ${task.name}${cardReadyText}">&#9654;</button>
+                          </div>
+                        </div>
+                    `;
+                    this.dom.taskList.appendChild(li);
+                });
+                 // Note: Disabling is handled directly in the HTML string now, no need for separate loop
+            }
+
+            populateStatDropdown() {
+                const select = this.dom.newTaskStat;
+                const currentVal = select.value; // Preserve selection if possible
+
+                // Clear existing options except the "None" option
+                while (select.options.length > 1) {
+                     select.remove(1);
+                }
+                select.options[0].textContent = "None"; // Ensure first option text is correct
+
+                 // Sort stats alphabetically for the dropdown
+                const sortedStats = [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name));
+
+                sortedStats.forEach(stat => {
+                    const option = document.createElement('option');
+                    option.value = stat.id;
+                    option.textContent = stat.name; // Use textContent for safety
+                    select.appendChild(option);
+                });
+
+                // Try to restore previous selection if it still exists
+                if (Array.from(select.options).some(opt => opt.value === currentVal)) {
+                    select.value = currentVal;
+                } else {
+                    select.value = ""; // Default to "None" if previous selection is gone
+                }
+            }
+
+
+            renderInventory(isTaskActive) { // Accept active state
+                this.dom.inventoryList.innerHTML = ''; // Clear list
+
+                if (this.state.inventory.length === 0) {
+                    this.dom.inventoryEmpty.classList.remove('hidden');
+                    this.dom.inventoryList.classList.add('hidden'); // Hide the UL itself
+                    return;
+                }
+
+                this.dom.inventoryEmpty.classList.add('hidden');
+                this.dom.inventoryList.classList.remove('hidden');
+
+                // Sort inventory alphabetically by card name
+                const sortedInventory = [...this.state.inventory].sort((a, b) => a.name.localeCompare(b.name));
+
+                sortedInventory.forEach(card => {
+                    const li = document.createElement('li');
+                    li.dataset.cardId = card.id;
+
+                    // Check if this card is currently selected for *any* task
+                    const isSelected = Object.values(this.state.cardToUseOnNext).includes(card.id);
+                    const buttonText = isSelected ? "Selected" : "Select for Task";
+                    // Disable button if task is active OR if this card is already selected
+                    const isDisabled = isTaskActive || isSelected;
+
+                    // Determine emoji: use card.emoji if exists, else lookup from reward or penalty types
+                    let emoji = card.emoji;
+                    if (!emoji) {
+                      const rewardType = this.rewardCardTypes.find(t => t.type === card.type);
+                      const penaltyType = this.penaltyTypes.find(t => t.type === card.type);
+                      emoji = (rewardType && rewardType.emoji) || (penaltyType && penaltyType.emoji) || '🎴';
+                    }
+
+                    li.innerHTML = `
+                        <div class="card-container">
+                            <div class="card-icon">${emoji}</div>
+                            <div class="card-details">
+                                <span class="card-name">${card.name}</span>
+                                <em class="card-desc">${card.description}</em>
+                            </div>
+                        </div>
+                    `;
+                    this.dom.inventoryList.appendChild(li);
+                });
+            }
+
+             renderActivePenalty(isTaskActive) { // Accept active state
+                 // Show penalty info only if a penalty is active for the *next* task AND no task is currently running
+                 const shouldShowPenalty = this.state.activePenalty && this.state.activePenalty.nextTask && !isTaskActive;
+
+                 if (shouldShowPenalty) {
+                    this.dom.activePenaltyDisplay.textContent = `Active: ${this.state.activePenalty.description}`;
+                    this.dom.activePenaltySection.classList.remove('hidden');
+                } else {
+                    this.dom.activePenaltySection.classList.add('hidden');
+                }
+            }
+
+
+            // --- Event Binding ---
+            bindEvents() {
+                this.dom.addTaskBtn.addEventListener('click', () => this.addTask());
+                this.dom.addStatBtn.addEventListener('click', () => this.addStat()); // Bind add stat button
+
+                // Hover sound for inventory cards
+                this.dom.inventoryList.addEventListener('mouseover', (event) => {
+                    const cardContainer = event.target.closest('.card-container');
+                    if (cardContainer && this.dom.inventoryList.contains(cardContainer)) {
+                        this.hoverSound.currentTime = 0;
+                        this.hoverSound.play().catch(() => {});
+                    }
+                });
+
+                // Hover sound for product list
+                this.dom.productList.addEventListener('mouseover', (event) => {
+                    const productItem = event.target.closest('li');
+                    if (productItem && this.dom.productList.contains(productItem)) {
+                        this.hoverSound.currentTime = 0;
+                        this.hoverSound.play().catch(() => {});
+                    }
+                });
+
+                // Event delegation for dynamic lists (more efficient)
+                this.dom.taskList.addEventListener('click', (event) => {
+                    const target = event.target.closest('button'); // Find the button clicked or its parent button
+                    if (!target) return; // Exit if click wasn't on or inside a button
+
+                    const taskId = target.dataset.taskId;
+                    if (!taskId) return; // Exit if button has no task-id
+
+                    if (target.classList.contains('start-task-btn')) {
+                         this.startTask(taskId);
+                    } else if (target.classList.contains('delete-task-btn')) {
+                         this.deleteTask(taskId);
+                    }
+                });
+
+                this.dom.inventoryList.addEventListener('click', (event) => {
+                    const cardContainer = event.target.closest('.card-container');
+                    if (!cardContainer) return;
+
+                    const li = cardContainer.closest('li');
+                    if (!li) return;
+
+                    const cardId = li.dataset.cardId;
+                    if (!cardId) return;
+
+                    if (this.state.tasks.length === 0) {
+                        alert("Add a task first before selecting a card!");
+                        return;
+                    }
+
+                    const card = this.state.inventory.find(c => c.id === cardId);
+
+                    const modal = document.getElementById('card-task-modal');
+                    const taskListDiv = document.getElementById('card-task-list');
+                    const cancelBtn = document.getElementById('cancel-card-task-btn');
+
+                    // Clear previous list
+                    taskListDiv.innerHTML = '';
+
+                    // Add task buttons
+                    this.state.tasks.forEach((task) => {
+                        const btn = document.createElement('button');
+                        btn.textContent = task.name;
+                        btn.style.width = '100%';
+                        btn.addEventListener('click', () => {
+                            this.selectCardForTask(cardId, task.id);
+                            modal.classList.add('hidden');
+                        });
+                        taskListDiv.appendChild(btn);
+                    });
+
+                    // Add unselect button
+                    const unselectBtn = document.createElement('button');
+                    unselectBtn.textContent = 'Unselect Card';
+                    unselectBtn.style.width = '100%';
+                    unselectBtn.style.background = '#777';
+                    unselectBtn.addEventListener('click', () => {
+                        Object.keys(this.state.cardToUseOnNext).forEach(taskId => {
+                            if (this.state.cardToUseOnNext[taskId] === cardId) {
+                                delete this.state.cardToUseOnNext[taskId];
+                                
+                            }
+                        });
+                        this.renderTasks();
+                        this.renderInventory();
+                        modal.classList.add('hidden');
+                    });
+                    taskListDiv.appendChild(unselectBtn);
+
+                    // Show modal
+                    modal.classList.remove('hidden');
+
+                    // Cancel button closes modal
+                    cancelBtn.onclick = () => {
+                        modal.classList.add('hidden');
+                    };
+                });
+
+                // Bind delete stat buttons using delegation
+                this.dom.userStatsList.addEventListener('click', (event) => {
+                    const target = event.target.closest('button.delete-stat-btn');
+                     if (target) {
+                         this.deleteStat(target.dataset.statId);
+                     }
+                });
+
+                // Task Runner Buttons
+                this.dom.completeTaskEarlyBtn.addEventListener('click', () => {
+                    if (this.state.activeTask) {
+                         this.completeTask(true);
+                    }
+                });
+                this.dom.failTaskBtn.addEventListener('click', () => {
+                    if (this.state.activeTask && confirm('Manually fail this task? This will trigger failure penalties (unless insured).')) {
+                         this.completeTask(false);
+                    }
+                });
+
+                this.dom.addProductBtn.addEventListener('click', () => this.addProduct());
+
+                this.dom.productList.addEventListener('click', (event) => {
+                    const target = event.target.closest('button.buy-product-btn');
+                    if (!target) return;
+
+                    const productId = target.dataset.productId;
+                    if (!productId) return;
+
+                    this.buyProduct(productId);
+                });
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            window.habitGame = new HabitGame();
+
+            // Toggle Add Task Popup
+            const addTaskBtn = document.getElementById('show-add-task-popup');
+            const addTaskPopup = document.getElementById('add-task-popup');
+            const closeAddTaskBtn = document.getElementById('close-add-task-popup');
+
+            if (addTaskBtn && addTaskPopup && closeAddTaskBtn) {
+                addTaskBtn.addEventListener('click', () => {
+                    addTaskPopup.classList.toggle('hidden');
+                });
+                closeAddTaskBtn.addEventListener('click', () => {
+                    addTaskPopup.classList.add('hidden');
+                });
+            }
+
+            // Toggle Add Product Popup
+            const addProductBtn = document.getElementById('show-add-product-popup');
+            const addProductPopup = document.getElementById('add-product-popup');
+            const closeAddProductBtn = document.getElementById('close-add-product-popup');
+
+            if (addProductBtn && addProductPopup && closeAddProductBtn) {
+                addProductBtn.addEventListener('click', () => {
+                    addProductPopup.classList.toggle('hidden');
+                });
+                closeAddProductBtn.addEventListener('click', () => {
+                    addProductPopup.classList.add('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>
