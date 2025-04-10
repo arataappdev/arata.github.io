@@ -663,3 +663,11 @@ select:focus {
   background: linear-gradient(90deg, #4facfe, #00f2fe);
   height: 100%;
 }
+
+/* =========================
+   Lootbox & Reward Pool Additions
+   ========================= */
+.controls { margin-bottom: 10px; }
+.form-popup { background: #222; padding: 15px; border-radius: 5px; }
+.form-popup div { margin-bottom: 10px; }
+.form-popup label { display: block; margin-bottom: 5px; }
