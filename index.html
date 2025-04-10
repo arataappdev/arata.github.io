@@ -3,179 +3,423 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Habit Challenge RPG - Dark Glass</title>
-    <!-- Import a modern font (optional, but recommended) -->
+    <title>Habit Game</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="game.css">
+    <!-- Removed external game.css link, styles are inline -->
+    <style>
+        /* Base variables (adjust colors as desired) */
+        :root {
+            --background-primary: #121212;
+            --background-secondary: #1a1a1a;
+            --background-tertiary: #2a2a2a;
+            --background-hover: #404040;
+            --text-primary: #e0e0e0;
+            --text-secondary: #aaaaaa;
+            --accent-primary: #64b5f6; /* Light Blue */
+            --accent-secondary: #ffab40; /* Orange */
+            --color-success: #4caf50; /* Green */
+            --color-warning: #ffc107; /* Yellow */
+            --color-danger: #f44336; /* Red */
+            --border-color: #444;
+            --spacing-sm: 5px;
+            --spacing-md: 10px;
+            --spacing-lg: 15px;
+            --radius-sm: 4px;
+            --radius-md: 8px;
+        }
+
+        /* General Styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--background-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: var(--spacing-lg);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            padding: var(--spacing-lg);
+            background-color: var(--background-secondary);
+            border-radius: var(--radius-md);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        h1, h2, h3 {
+            color: var(--accent-primary);
+            margin-top: 0;
+            margin-bottom: var(--spacing-lg);
+        }
+        h2 { margin-top: var(--spacing-lg); border-bottom: 1px solid var(--border-color); padding-bottom: var(--spacing-sm); }
+
+        button {
+            padding: 8px 15px;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-weight: 500;
+            background-color: var(--accent-primary);
+            color: #111;
+            transition: background-color 0.2s ease;
+        }
+        button:hover:not(:disabled) { background-color: #82c7ff; }
+        button:disabled { background-color: #555; color: #999; cursor: not-allowed; }
+        button.delete { background-color: var(--color-danger); color: white; }
+        button.delete:hover:not(:disabled) { background-color: #ff6b60; }
+        button.use-card { background-color: var(--color-success); color: white; }
+        button.use-card:hover:not(:disabled) { background-color: #6fbf73; }
+
+        input[type="text"], input[type="number"], textarea, select {
+            background-color: var(--background-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 8px;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input::placeholder, textarea::placeholder { color: var(--text-secondary); }
+        label { display: block; margin-bottom: var(--spacing-sm); font-size: 0.9em; color: var(--text-secondary); }
+
+        ul { list-style: none; padding: 0; margin: 0; }
+        li { margin-bottom: var(--spacing-md); }
+
+        /* Section Styles */
+        .section { margin: var(--spacing-lg) 0; padding: var(--spacing-lg); background: var(--background-secondary); border-radius: var(--radius-md); border: 1px solid var(--border-color); }
+        .controls { margin-bottom: var(--spacing-md); display: flex; gap: var(--spacing-md); }
+
+        /* Form Popup */
+        .form-popup { background: var(--background-tertiary); padding: var(--spacing-lg); border-radius: var(--radius-sm); margin-top: var(--spacing-md); border: 1px solid var(--border-color); }
+        .form-popup div { margin-bottom: var(--spacing-md); }
+        .form-popup button:last-of-type { background-color: #555; } /* Style Close button */
+        .form-popup button:last-of-type:hover:not(:disabled) { background-color: #777; }
+
+        /* General Stats */
+        .general-stats { text-align: center; margin-bottom: var(--spacing-lg); font-size: 1.1em; color: var(--text-secondary); }
+
+        /* User Stats */
+        #user-stats-list li { display: block; list-style: none; } /* Override flex if needed */
+        .stat-card {
+            background-color: var(--background-tertiary); padding: var(--spacing-md) var(--spacing-lg); border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color); margin-bottom: var(--spacing-sm); position: relative;
+        }
+        .delete-stat-btn { position: absolute; top: 5px; right: 5px; padding: 2px 6px; font-size: 0.8em; }
+        .stat-level { font-weight: bold; color: var(--accent-secondary); }
+        .stat-name { font-size: 1.1em; font-weight: 500; margin: 3px 0; }
+        .stat-xp { font-size: 0.9em; color: var(--text-secondary); }
+        .xp-bar { background-color: #555; height: 8px; border-radius: var(--radius-sm); overflow: hidden; margin-top: var(--spacing-sm); }
+        .xp-bar-fill { background: linear-gradient(90deg, var(--color-success) 0%, var(--accent-primary) 100%); height: 100%; transition: width 0.3s ease; }
+
+        /* Task Runner */
+        .task-timer { text-align: center; }
+        #timer-display { font-size: 2.5em; font-weight: bold; display: block; margin-bottom: var(--spacing-sm); }
+        .timer-bar-container { background: #444; border-radius: 5px; overflow: hidden; margin: 5px 0 var(--spacing-md); }
+        #timer-bar { height: 10px; width: 100%; background: linear-gradient(90deg, var(--color-success) 0%, var(--accent-primary) 100%); transition: width 0.1s linear; }
+        #task-runner .controls button { margin: 0 var(--spacing-sm); }
+
+        /* Penalty Display */
+        .penalty-active { color: var(--color-warning); font-weight: bold; }
+
+        /* Task List */
+        #task-list li {
+            background-color: var(--background-tertiary);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            margin-bottom: var(--spacing-sm);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-card-content { display: flex; justify-content: space-between; width: 100%; align-items: center; }
+        .task-info { flex-grow: 1; margin-right: var(--spacing-lg); }
+        .task-name { font-weight: bold; font-size: 1.1em; }
+        .task-time, .task-best-time, .task-stat, .task-desc { font-size: 0.9em; color: var(--text-secondary); margin-top: 3px; }
+        .task-desc { font-style: italic; }
+        .task-actions { display: flex; gap: var(--spacing-sm); }
+        .task-actions button { padding: 5px 10px; font-size: 1.2em; /* Make icons bigger */}
+
+        /* Inventory List - Updated for Clickable Cards */
+        #inventory-list {
+            display: grid; /* Use grid for better layout */
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Responsive columns */
+            gap: var(--spacing-md);
+        }
+        #inventory-list li {
+            display: block; /* Reset from flex if it was set */
+            background-color: var(--background-tertiary);
+            padding: var(--spacing-md);
+            margin-bottom: 0; /* Handled by gap */
+            border-radius: var(--radius-sm);
+            border: 2px solid transparent; /* Base for selected state */
+            position: relative; /* Needed for absolute positioning of status */
+            transition: background-color 0.2s ease, transform 0.1s ease, border-color 0.2s ease;
+        }
+        #inventory-list li.clickable-card { cursor: pointer; }
+        #inventory-list li.clickable-card:not(.disabled):hover {
+            background-color: var(--background-hover);
+            transform: translateY(-2px);
+            border-color: #555; /* Subtle border hover */
+        }
+        #inventory-list li.clickable-card.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+        #inventory-list li.clickable-card.selected-for-task {
+            border-color: var(--accent-primary);
+            /* background-color: #3a5a6a; Optional */
+        }
+        .card-container {
+            display: flex;
+            flex-direction: column; /* Stack icon and details vertically */
+            align-items: center; /* Center items */
+            text-align: center; /* Center text */
+            width: 100%;
+        }
+        .card-icon { margin-bottom: var(--spacing-sm); font-size: 2em; } /* Larger icon */
+        .card-details { flex-grow: 1; }
+        .card-name { font-weight: 500; display: block; margin-bottom: 3px; }
+        .card-desc { font-size: 0.85em; color: var(--text-secondary); }
+        .card-status {
+            position: absolute;
+            top: 5px; right: 5px;
+            font-size: 0.7em;
+            background-color: var(--accent-primary);
+            color: #111;
+            padding: 1px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+        #inventory-empty { text-align: center; color: var(--text-secondary); font-style: italic; grid-column: 1 / -1; /* Span all columns */}
+
+        /* Reward Pool List */
+        #reward-pool-list li {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px; background: var(--background-tertiary); margin-bottom: 5px; border-radius: var(--radius-sm);
+        }
+        #reward-pool-list li button { margin-left: var(--spacing-md); padding: 3px 8px; }
+        #reward-pool-status { margin-top: var(--spacing-md); color: var(--text-secondary); }
+
+        /* Store List */
+        #lootbox-list { display: flex; gap: var(--spacing-lg); flex-wrap: wrap; }
+        .lootbox-item {
+            background: var(--background-tertiary);
+            padding: var(--spacing-lg);
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            flex-basis: 200px; /* Minimum width */
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center content */
+            text-align: center;
+        }
+         .lootbox-item h3 { margin-bottom: var(--spacing-sm); color: var(--accent-secondary); }
+         .lootbox-item p { margin-bottom: var(--spacing-md); color: var(--text-secondary); }
+         .lootbox-item button { margin-top: auto; /* Push button to bottom */ padding: 5px 10px; width: 80%; }
+
+        /* Modal Styles */
+        .hidden { display: none !important; } /* Use important to override potential conflicts */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.7); display: flex; justify-content: center; align-items: center; z-index: 1000;
+            backdrop-filter: blur(3px);
+        }
+        .modal-content { background: var(--background-secondary); padding: 20px 30px; border-radius: var(--radius-md); min-width: 300px; max-width: 90%; border: 1px solid var(--border-color); box-shadow: 0 5px 20px rgba(0,0,0,0.4); }
+        .modal-content h3 { margin-bottom: var(--spacing-lg); }
+        #card-task-list button { width: 100%; margin-bottom: var(--spacing-sm); }
+        #cancel-card-task-btn { background: #555; margin-top: var(--spacing-md); width: 100%; }
+        #cancel-card-task-btn:hover { background: #777; }
+
+        /* User Stats Flex Layout Override */
+        #user-stats-list {
+            display: flex;
+            flex-direction: row;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        #user-stats-list li {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
 </head>
 <body>
-    <!-- Existing HTML Structure -->
     <div class="container">
-        <h1>Habit Challenge RPG</h1>
+        <h1>Habit Challenge RPG - Balatro Style</h1>
 
-        <div class="general-stats" id="general-stats-display">Coins: 0 | Base XP per Task: 15</div>
+        <div class="general-stats" id="general-stats-display">Coins: 0 | Base Stat XP: 15</div>
 
         <!-- User Stats Section -->
         <div id="user-stats-section" class="section">
             <h2>Character Stats</h2>
-            <ul id="user-stats-list">
-                <!-- JS Populated -->
-                 <li>No stats created yet. Add one below!</li>
-            </ul>
-            <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-sm); align-items: flex-end;">
-                 <div style="flex-grow: 1;">
-                     <label for="new-stat-name">New Stat Name:</label>
-                     <input type="text" id="new-stat-name" placeholder="e.g., Focus" style="width: 100%;">
-                 </div>
-                 <button id="add-stat-btn">Add Stat</button>
+            <div class="section-content">
+                <ul id="user-stats-list">
+                     <!-- JS Populated -->
+                     <li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No stats created yet. Add one below.</li>
+                </ul>
+                <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-md); align-items: flex-end;">
+                     <div style="flex-grow: 1;">
+                         <label for="new-stat-name">New Stat Name:</label>
+                         <input type="text" id="new-stat-name" placeholder="e.g., Focus" style="width: 100%;">
+                     </div>
+                     <button id="add-stat-btn">Add Stat</button>
+                </div>
             </div>
-            <iframe id="spider-graph-iframe" src="spider-graph.html" frameborder="0" width="100%" height="350"></iframe>
         </div>
 
         <!-- Task Runner Section (Initially Hidden) -->
         <div id="task-runner" class="section hidden">
             <h2 id="task-runner-name">Running Task...</h2>
-            <div class="task-timer">
-                <span id="timer-display">00:00</span>
-                <div class="timer-bar-container">
-                    <div id="timer-bar" class="timer-bar"></div>
+            <div class="section-content">
+                <div class="task-timer">
+                    <span id="timer-display">00:00</span>
+                    <div class="timer-bar-container">
+                        <div id="timer-bar" class="timer-bar"></div>
+                    </div>
+                    <div class="controls" style="justify-content: center;">
+                        <button id="complete-task-early-btn" class="use-card">Complete Task Now</button>
+                        <button id="fail-task-btn" class="delete">Fail Task</button>
+                    </div>
                 </div>
-                <!-- Group control buttons together -->
-                <div>
-                    <button id="complete-task-early-btn" class="use-card">Complete Task Now</button>
-                    <button id="fail-task-btn" class="delete">Fail Task (Debug)</button>
-                </div>
-                 <!-- Ghost run display could go here -->
             </div>
         </div>
 
         <!-- Active Penalty Section -->
         <div id="active-penalty-section" class="section hidden">
             <h2>Next Task Penalty</h2>
-            <p id="active-penalty-display" class="penalty-active"></p>
-        </div>
-
-        <!-- Active Penalties Window -->
-        <div id="active-penalties-window" class="section">
-            <h2>Active Penalties</h2>
-            <ul id="active-penalties-list">
-                <!-- Populated dynamically -->
-            </ul>
+            <div class="section-content">
+                <p id="active-penalty-display" class="penalty-active"></p>
+            </div>
         </div>
 
         <!-- Task Management Section -->
         <div id="task-management" class="section">
             <h2>Manage Tasks</h2>
-            <div class="controls">
-                <button id="show-add-task-popup">+ Add Task</button>
+            <div class="section-content">
+                <div class="controls">
+                    <button id="show-add-task-popup">+ Add Task</button>
+                </div>
+        
+                <div class="form-popup hidden" id="add-task-popup">
+                    <h3>Create New Task</h3>
+                     <div><label for="new-task-name">Task Name:</label><input type="text" id="new-task-name"></div>
+                     <div><label for="new-task-time">Time (s):</label><input type="number" id="new-task-time" min="10" placeholder="Min 10s"></div>
+                     <div><label for="new-task-stat">Assign Stat XP:</label><select id="new-task-stat"><option value="">None</option></select></div>
+                     <div><label for="new-task-desc">Description:</label><textarea id="new-task-desc" placeholder="Optional details"></textarea></div>
+                     <div><label for="new-task-xp">Base Stat XP:</label><input type="number" id="new-task-xp" placeholder="Optional, default: 15" min="0"></div>
+                     <button id="add-task-btn">Add Task</button>
+                     <button id="close-add-task-popup" type="button">Close</button>
+                </div>
+                <ul id="task-list">
+                    <li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No tasks added yet.</li>
+                </ul>
             </div>
-
-            <div class="form-popup hidden" id="add-task-popup">
-                <h3>Create New Task</h3>
-                <div>
-                    <label for="new-task-name">Task Name:</label>
-                    <input type="text" id="new-task-name" placeholder="Enter task name">
-                </div>
-                <div>
-                    <label for="new-task-time">Time (s):</label>
-                    <input type="number" id="new-task-time" placeholder="Min 10s" min="10">
-                </div>
-                <div>
-                    <label for="new-task-stat">Assign Stat XP:</label>
-                    <select id="new-task-stat">
-                        <option value="">None</option>
-                        <!-- Stat options will be populated here -->
-                    </select>
-                </div>
-                <div>
-                    <label for="new-task-desc">Description:</label>
-                    <textarea id="new-task-desc" placeholder="Enter task description"></textarea>
-                </div>
-                <div>
-                    <label for="new-task-xp">XP Reward:</label>
-                    <input type="number" id="new-task-xp" placeholder="XP for completing task" min="0">
-                </div>
-                <button id="add-task-btn">Add Task</button>
-                <button id="close-add-task-popup">Close</button>
-            </div>
-            <ul id="task-list">
-                 <!-- JS Populated -->
-                <li>No tasks added yet.</li>
-            </ul>
         </div>
 
         <!-- Inventory Section -->
         <div id="inventory-section" class="section">
             <h2>Reward Card Inventory</h2>
-            <ul id="inventory-list">
-                 <!-- JS Populated -->
-            </ul>
-            <p id="inventory-empty" class="hidden">Your inventory is empty.</p>
+            <div class="section-content">
+                <ul id="inventory-list">
+                    <!-- JS Populated: Cards will appear here -->
+                </ul>
+                <p id="inventory-empty" class="hidden">Your inventory is empty.</p>
+            </div>
         </div>
+
+        <!-- Reward Pool Management -->
 
         <!-- Store Section -->
         <div id="store-section" class="section">
-            <h2>Store</h2>
-            <button id="show-add-product-popup" style="margin-bottom: 15px;">+ Add Product</button>
-
-            <div class="form-popup hidden" id="add-product-popup">
-                <h3>Add New Product</h3>
-                <div>
-                    <label for="new-product-name">Name:</label>
-                    <input type="text" id="new-product-name" placeholder="Product Name">
+            <h2>Lootbox Store</h2>
+            <div class="section-content">
+                <div id="lootbox-list">
+                     <!-- JS Populated -->
+                    <p>Generate lootboxes from the Reward Pool section first.</p>
                 </div>
-                <div>
-                    <label for="new-product-description">Description:</label>
-                    <textarea id="new-product-description" placeholder="Product Description"></textarea>
-                </div>
-                <div>
-                    <label for="new-product-image">Image URL:</label>
-                    <input type="text" id="new-product-image" placeholder="Image URL">
-                </div>
-                <div>
-                    <label for="new-product-price">Price:</label>
-                    <input type="number" id="new-product-price" placeholder="Price">
-                </div>
-                <button id="add-product-btn">Add Product</button>
-                <button id="close-add-product-popup">Close</button>
             </div>
-
-            <h3 style="margin-top: 20px;">Available Products</h3>
-            <ul id="product-list">
-                <!-- Products will be populated here -->
-            </ul>
         </div>
 
-    </div>
+        <div id="reward-pool-section" class="section">
+            <h2>Reward Pool (Needs multiple of 3)</h2>
+            <div class="section-content">
+                <div class="controls">
+                    <button id="show-add-reward-popup">+ Add Reward</button>
+                    <button id="generate-lootboxes-btn" disabled>Generate Lootboxes</button>
+                </div>
+                <div class="form-popup hidden" id="add-reward-popup">
+                    <h3>Add Custom Reward</h3>
+                    <div>
+                        <label for="new-reward-name">Reward Name:</label>
+                        <input type="text" id="new-reward-name" placeholder="e.g., 15 Min Break">
+                    </div>
+                    <div>
+                        <label for="new-reward-weight">Pleasurability (1=High Chance, 10=Low Chance):</label>
+                        <input type="number" id="new-reward-weight" min="1" max="10" placeholder="1-10">
+                    </div>
+                    <button id="add-reward-btn">Add Reward to Pool</button>
+                    <button id="close-add-reward-popup" type="button">Close</button>
+                </div>
+                <ul id="reward-pool-list">
+                     <!-- JS Populated -->
+                    <li style="justify-content: center; color: var(--text-secondary); font-style: italic;">Add rewards to the pool.</li>
+                </ul>
+                <p id="reward-pool-status">Pool empty. Add rewards.</p>
+            </div>
+        </div>
+    </div> <!-- End Container -->
 
     <!-- Card Task Selection Modal -->
     <div id="card-task-modal" class="hidden modal-overlay">
       <div class="modal-content">
         <h3>Select a Task for this Card</h3>
-        <div id="card-task-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;"></div>
-        <button id="cancel-card-task-btn" style="background: #555;">Cancel</button>
+        <div id="card-task-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;">
+             <!-- Task buttons populated by JS -->
+        </div>
+        <button id="cancel-card-task-btn">Cancel</button>
       </div>
     </div>
 
-    <!-- Existing JavaScript (no changes needed here for styling) -->
     <script>
-        
         class HabitGame {
-    constructor() {
-        this.hoverSound = new Audio('hover.mp3');
-        this.hoverSound.volume = 1.0;
-        this.winSound = new Audio('win.mp3');
-        this.winSound.volume = 1.0;
-        this.loseSound = new Audio('lose.mp3');
-        this.loseSound.volume = 1.0;
-        this.timerSound = new Audio('timer.mp3');
-        this.timerSound.loop = true;
-        this.timerSound.volume = 0;
+            constructor() {
+                // --- Audio Setup ---
+                try {
+                    this.hoverSound = new Audio('hover.mp3'); // Replace with actual paths if needed
+                    this.hoverSound.volume = 0.5;
+                    this.winSound = new Audio('win.mp3');
+                    this.winSound.volume = 0.8;
+                    this.loseSound = new Audio('lose.mp3');
+                    this.loseSound.volume = 0.8;
+                    this.timerSound = new Audio('timer.mp3');
+                    this.timerSound.loop = true;
+                    this.timerSound.volume = 0;
+                    this.coinSound = new Audio('coin.mp3');
+                    this.coinSound.volume = 0.7;
+                    this.openBoxSound = new Audio('open_box.mp3');
+                    this.openBoxSound.volume = 0.9;
+                    this.burnSound = new Audio('burn.mp3');
+                    this.burnSound.volume = 0.6;
+                    // Preload attempt (optional)
+                    this.hoverSound.load(); this.winSound.load(); this.loseSound.load(); this.timerSound.load(); this.coinSound.load(); this.openBoxSound.load(); this.burnSound.load();
+                } catch (e) {
+                    console.warn("Audio setup failed (maybe no audio support or files missing):", e);
+                    // Create dummy audio objects so calls don't break
+                    this.hoverSound = this.winSound = this.loseSound = this.timerSound = this.coinSound = this.openBoxSound = this.burnSound = { play: () => {}, pause: () => {}, load: () => {}, currentTime: 0, volume: 0 };
+                }
+                this.sectionVisibility = this.loadSectionVisibility();
+                this.addSectionToggles();
 
-        this.dom = {
+                // --- DOM Elements ---
+                this.dom = {
                     generalStatsDisplay: document.getElementById('general-stats-display'),
                     taskRunner: document.getElementById('task-runner'),
                     taskRunnerName: document.getElementById('task-runner-name'),
@@ -186,907 +430,711 @@
                     activePenaltySection: document.getElementById('active-penalty-section'),
                     activePenaltyDisplay: document.getElementById('active-penalty-display'),
                     taskManagement: document.getElementById('task-management'),
+                    showAddTaskPopup: document.getElementById('show-add-task-popup'),
+                    addTaskPopup: document.getElementById('add-task-popup'),
                     newTaskName: document.getElementById('new-task-name'),
                     newTaskTime: document.getElementById('new-task-time'),
-                    newTaskStat: document.getElementById('new-task-stat'), // New select element
+                    newTaskStat: document.getElementById('new-task-stat'),
+                    newTaskDesc: document.getElementById('new-task-desc'),
+                    newTaskXp: document.getElementById('new-task-xp'),
                     addTaskBtn: document.getElementById('add-task-btn'),
+                    closeAddTaskPopup: document.getElementById('close-add-task-popup'),
                     taskList: document.getElementById('task-list'),
                     inventorySection: document.getElementById('inventory-section'),
                     inventoryList: document.getElementById('inventory-list'),
                     inventoryEmpty: document.getElementById('inventory-empty'),
-                    userStatsSection: document.getElementById('user-stats-section'), // New Stats Section
-                    userStatsList: document.getElementById('user-stats-list'),     // New Stats List
-                    newStatName: document.getElementById('new-stat-name'),       // New Stat Input
-                    addStatBtn: document.getElementById('add-stat-btn'),         // New Stat Button
-                    newProductName: document.getElementById('new-product-name'),
-                    newProductDescription: document.getElementById('new-product-description'),
-                    newProductImage: document.getElementById('new-product-image'),
-                    newProductPrice: document.getElementById('new-product-price'),
-                    addProductBtn: document.getElementById('add-product-btn'),
-                    productList: document.getElementById('product-list')
+                    userStatsSection: document.getElementById('user-stats-section'),
+                    userStatsList: document.getElementById('user-stats-list'),
+                    newStatName: document.getElementById('new-stat-name'),
+                    addStatBtn: document.getElementById('add-stat-btn'),
+                    cardTaskModal: document.getElementById('card-task-modal'),
+                    cardTaskList: document.getElementById('card-task-list'),
+                    cancelCardTaskBtn: document.getElementById('cancel-card-task-btn'),
+                    rewardPoolSection: document.getElementById('reward-pool-section'),
+                    showAddRewardPopup: document.getElementById('show-add-reward-popup'),
+                    addRewardPopup: document.getElementById('add-reward-popup'),
+                    newRewardName: document.getElementById('new-reward-name'),
+                    newRewardWeight: document.getElementById('new-reward-weight'),
+                    addRewardBtn: document.getElementById('add-reward-btn'),
+                    closeAddRewardPopup: document.getElementById('close-add-reward-popup'),
+                    rewardPoolList: document.getElementById('reward-pool-list'),
+                    rewardPoolStatus: document.getElementById('reward-pool-status'),
+                    generateLootboxesBtn: document.getElementById('generate-lootboxes-btn'),
+                    storeSection: document.getElementById('store-section'),
+                    lootboxList: document.getElementById('lootbox-list'),
                 };
 
                 // --- Configuration ---
                 this.config = {
-                    baseXpPerTask: 15, // Base XP awarded for tasks (before multipliers/tiers)
+                    baseXpPerTask: 15,
                     baseCoinsPerTask: 10,
-                    statBaseXpForLevel2: 100, // XP needed to get from level 1 to level 2
-                    statXpLevelMultiplier: 1.5 // How much harder each level gets (1.5 means 50% more XP than the previous level)
+                    statBaseXpForLevel2: 100,
+                    statXpLevelMultiplier: 1.5,
+                    lootboxBasePrice: 100, // Constant 'n'
+                    rewardsPerLootbox: 3,
+                    numberOfLootboxes: 3
                 };
 
+                // --- Game State ---
                 this.state = {
-                    tasks: [], // { id, name, baseTime, bestTime, statId }
-                    inventory: [], // { id, name, type, description, effect?, multiplier? }
-                    generalStats: { coins: 0 }, // Only coins for now
-                    userStats: [], // { id, name, level, xp, xpToNextLevel } <--- NEW
-                    activePenalty: null, // { type, description, value?, immediate?, nextTask?, effect? }
-                    activeTask: null, // { taskId, startTime, timerId, timeLimit, cardUsed, initialTimeLimit }
-                    cardToUseOnNext: {}, // { taskId: cardId }
-                    products: [] // { id, name, description, image, price }
+                    tasks: [],
+                    inventory: [],
+                    generalStats: { coins: 0 },
+                    userStats: [],
+                    activePenalty: null,
+                    activeTask: null,
+                    cardToUseOnNext: {},
+                    rewardPool: [],
+                    lootboxes: [] // Generated, not saved
                 };
 
+                // Card & Penalty Definitions
                 this.rewardCardTypes = [
-                    { type: 'EXTRA_TIME_ACE', name: 'Extra Time Ace', emoji: '⏰', description: 'Gain an extra 30 seconds to complete your task.', effect: (limit) => limit + 30, power: 2 },
-                    { type: 'TIME_JACKPOT', name: 'Time Jackpot', emoji: '🎰', description: 'Hit the jackpot! +60 seconds bonus time.', effect: (limit) => limit + 60, power: 3 },
-                    { type: 'DOUBLE_XP', name: 'Double Down XP', emoji: '✨', description: 'Double the XP earned for this task.', multiplier: { xp: 2 }, power: 3 },
-                    { type: 'DOUBLE_COINS', name: 'High Roller Coins', emoji: '💰', description: 'Double the coins earned for this task.', multiplier: { coins: 2 }, power: 3 },
-                    { type: 'INSURANCE', name: 'Insurance Policy', emoji: '🛡️', description: 'Negate any penalty if you fail this task.', power: 4 },
-                    { type: 'TRIPLE_XP', name: 'Triple Threat XP', emoji: '🔥', description: 'Triple the XP earned for this task.', multiplier: { xp: 3 }, power: 5 },
-                    { type: 'COIN_MAGNET', name: 'Coin Magnet', emoji: '🧲', description: 'Earn 50% more coins for this task.', multiplier: { coins: 1.5 }, power: 2 },
-                    { type: 'TIME_REWIND', name: 'Time Rewind', emoji: '⏪', description: 'Adds 15 seconds back once when timer drops below 10 seconds.', special: 'timeRewind', power: 4 },
-                    { type: 'LUCKY_STREAK', name: 'Lucky Streak', emoji: '🍀', description: '25% chance to double all rewards for this task.', special: 'luckyStreak', power: 3 },
-                    { type: 'COMBO_CHAIN', name: 'Combo Chain', emoji: '🔗', description: 'Next reward card effect is doubled.', special: 'comboChain', power: 5 },
+                    { type: 'EXTRA_TIME_ACE', name: 'Extra Time Ace', emoji: '⏰', description: '+30s task time', effect: (limit) => limit + 30 },
+                    { type: 'TIME_JACKPOT', name: 'Time Jackpot', emoji: '🎰', description: '+60s task time', effect: (limit) => limit + 60 },
+                    { type: 'DOUBLE_XP', name: 'Double Down XP', emoji: '✨', description: '2x Stat XP gain', multiplier: { xp: 2 } },
+                    { type: 'DOUBLE_COINS', name: 'High Roller Coins', emoji: '💰', description: '2x Coin gain', multiplier: { coins: 2 } },
+                    { type: 'INSURANCE', name: 'Insurance Policy', emoji: '🛡️', description: 'Negate failure penalty', special: 'insurance' },
+                    { type: 'TRIPLE_XP', name: 'Triple Threat XP', emoji: '🔥', description: '3x Stat XP gain', multiplier: { xp: 3 } },
+                    { type: 'COIN_MAGNET', name: 'Coin Magnet', emoji: '🧲', description: '1.5x Coin gain', multiplier: { coins: 1.5 } },
+                    //{ type: 'TIME_REWIND', name: 'Time Rewind', emoji: '⏪', description: 'Adds 15s < 10s left', special: 'timeRewind' }, // Complex logic needed in timer
+                    { type: 'LUCKY_STREAK', name: 'Lucky Streak', emoji: '🍀', description: '25% chance 2x rewards', special: 'luckyStreak' },
+                    //{ type: 'COMBO_CHAIN', name: 'Combo Chain', emoji: '🔗', description: 'Next card effect x2', special: 'comboChain' }, // Complex logic
                 ];
-
                 this.penaltyTypes = [
-                    { type: 'BAD_BEAT', name: 'Bad Beat', emoji: '💥', description: 'Lose a random reward card from your inventory.', immediate: true, severity: 2 },
-                    { type: 'LET_IT_RIDE', name: 'Let It Ride', emoji: '🔄', description: 'You must immediately retry the same task.', immediate: true, severity: 3 },
-                    { type: 'TIME_CRUNCH', name: 'Time Crunch', emoji: '⏳', description: 'Next task has 25% less time.', nextTask: true, effect: (limit) => limit * 0.75, severity: 2 },
-                    { type: 'BEAT_THE_CLOCK', name: 'Beat The Clock', emoji: '⏱️', description: 'Next task loses 15 seconds.', nextTask: true, effect: (limit) => Math.max(10, limit - 15), severity: 2 },
-                    { type: 'HALF_COINS', name: 'Half Coins', emoji: '🪙', description: 'Next task earns 50% fewer coins.', nextTask: true, penaltyMultiplier: { coins: 0.5 }, severity: 2 },
-                    { type: 'XP_DRAIN', name: 'XP Drain', emoji: '🩸', description: 'Next task earns 50% less XP.', nextTask: true, penaltyMultiplier: { xp: 0.5 }, severity: 2 },
-                    { type: 'TIME_BOMB', name: 'Time Bomb', emoji: '💣', description: 'Next task timer reduced by 20%.', nextTask: true, effect: (limit) => limit * 0.8, severity: 3 },
-                    { type: 'CURSE_OF_DOUBT', name: 'Curse of Doubt', emoji: '🧿', description: '25% chance to nullify all rewards on next task.', nextTask: true, special: 'curseOfDoubt', severity: 4 },
-                    { type: 'DOUBLE_TROUBLE', name: 'Double Trouble', emoji: '⚠️', description: 'Next penalty effect is doubled.', nextTask: true, special: 'doubleTrouble', severity: 5 },
+                    { type: 'BAD_BEAT', name: 'Bad Beat', emoji: '💥', description: 'Lose random card', immediate: true },
+                    { type: 'LET_IT_RIDE', name: 'Let It Ride', emoji: '🔄', description: 'Retry task immediately', immediate: true },
+                    { type: 'TIME_CRUNCH', name: 'Time Crunch', emoji: '⏳', description: 'Next task -25% time', nextTask: true, effect: (limit) => limit * 0.75 },
+                    { type: 'BEAT_THE_CLOCK', name: 'Beat The Clock', emoji: '⏱️', description: 'Next task -15s', nextTask: true, effect: (limit) => Math.max(10, limit - 15) },
+                    { type: 'HALF_COINS', name: 'Half Coins', emoji: '🪙', description: 'Next task -50% coins', nextTask: true, penaltyMultiplier: { coins: 0.5 } },
+                    { type: 'XP_DRAIN', name: 'XP Drain', emoji: '🩸', description: 'Next task -50% Stat XP', nextTask: true, penaltyMultiplier: { xp: 0.5 } },
+                    { type: 'TIME_BOMB', name: 'Time Bomb', emoji: '💣', description: 'Next task -20% time', nextTask: true, effect: (limit) => limit * 0.8 },
+                    { type: 'CURSE_OF_DOUBT', name: 'Curse of Doubt', emoji: '🧿', description: 'Next task 25% chance 0 rewards', nextTask: true, special: 'curseOfDoubt' },
+                    { type: 'DOUBLE_TROUBLE', name: 'Double Trouble', emoji: '⚠️', description: 'Next penalty effect doubled', nextTask: true, special: 'doubleTrouble' },
                 ];
 
+                // --- Initialization ---
                 this.loadState();
+                this.loadLootboxes();
                 this.bindEvents();
                 this.render();
             }
 
-            // --- Store Management ---
-            addProduct() {
-                const name = this.dom.newProductName.value.trim();
-                const description = this.dom.newProductDescription.value.trim();
-                const image = this.dom.newProductImage.value.trim();
-                const priceInput = this.dom.newProductPrice.value;
-
-                if (!name || !description || !image || !priceInput) {
-                    alert('Please fill in all product details.');
-                    return;
-                }
-
-                const price = parseInt(priceInput, 10);
-
-                if (isNaN(price) || price < 0) {
-                    alert('Please provide a valid price.');
-                    return;
-                }
-
-                const newProduct = {
-                    id: `product_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                    name: name,
-                    description: description,
-                    image: image,
-                    price: price
-                };
-
-                this.state.products.push(newProduct);
-                this.dom.newProductName.value = '';
-                this.dom.newProductDescription.value = '';
-                this.dom.newProductImage.value = '';
-                this.dom.newProductPrice.value = '';
-                this.saveState();
-                this.renderProducts();
-                
-            }
-
-            renderProducts() {
-                this.dom.productList.innerHTML = '';
-                if (this.state.products.length === 0) {
-                    this.dom.productList.innerHTML = '<li>No products available.</li>';
-                    return;
-                }
-
-                this.state.products.forEach(product => {
-                    const li = document.createElement('li');
-                    li.dataset.productId = product.id;
-                    li.innerHTML = `
-                        <img src="${product.image}" alt="${product.name}" style="width: 50px; height: 50px;">
-                        <span>${product.name} - ${product.description} - ${product.price} coins</span>
-                        <button data-product-id="${product.id}" class="buy-product-btn">Buy</button>
-                    `;
-                    this.dom.productList.appendChild(li);
-                });
-            }
-
-            buyProduct(productId) {
-                const product = this.state.products.find(p => p.id === productId);
-                if (!product) {
-                    alert('Product not found.');
-                    return;
-                }
-
-                if (this.state.generalStats.coins < product.price) {
-                    alert('Not enough coins.');
-                    return;
-                }
-
-                this.state.generalStats.coins -= product.price;
-                this.saveState();
-                this.renderGeneralStats();
-                alert(`Bought ${product.name} for ${product.price} coins.`);
-            }
-
             // --- State Management ---
             loadState() {
-                const savedState = localStorage.getItem('habitGameState_v2'); // Use new key for safety
+                console.log("Loading state...");
+                const savedState = localStorage.getItem('habitGameState_v2');
                 if (savedState) {
-                    const parsed = JSON.parse(savedState);
-                    // Basic validation and default values
-                    this.state.tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
-                    this.state.inventory = Array.isArray(parsed.inventory) ? parsed.inventory : [];
-                    this.state.generalStats = typeof parsed.generalStats === 'object' && parsed.generalStats !== null ? parsed.generalStats : { coins: 0 };
-                    this.state.userStats = Array.isArray(parsed.userStats) ? parsed.userStats : []; // Load user stats
-                    this.state.activePenalty = typeof parsed.activePenalty === 'object' ? parsed.activePenalty : null; // Can be null
-                    this.state.cardToUseOnNext = typeof parsed.cardToUseOnNext === 'object' && parsed.cardToUseOnNext !== null ? parsed.cardToUseOnNext : {};
+                    try {
+                        const parsed = JSON.parse(savedState);
+                        this.state.tasks = Array.isArray(parsed.tasks) ? parsed.tasks : [];
+                        this.state.inventory = Array.isArray(parsed.inventory) ? parsed.inventory : [];
+                        this.state.generalStats = typeof parsed.generalStats === 'object' && parsed.generalStats !== null ? parsed.generalStats : { coins: 0 };
+                        this.state.userStats = Array.isArray(parsed.userStats) ? parsed.userStats : [];
+                        this.state.activePenalty = typeof parsed.activePenalty === 'object' ? parsed.activePenalty : null;
+                        this.state.cardToUseOnNext = typeof parsed.cardToUseOnNext === 'object' && parsed.cardToUseOnNext !== null ? parsed.cardToUseOnNext : {};
+                        this.state.rewardPool = Array.isArray(parsed.rewardPool) ? parsed.rewardPool : [];
+                        console.log("State loaded successfully.");
+                    } catch (e) {
+                         console.error("Failed to parse saved state:", e);
+                         // Reset to defaults if parsing fails
+                         this.state = { tasks: [], inventory: [], generalStats: { coins: 0 }, userStats: [], activePenalty: null, activeTask: null, cardToUseOnNext: {}, rewardPool: [], lootboxes: [] };
+                    }
+                } else {
+                    console.log("No saved state found, using defaults.");
                 }
-                 // Ensure numeric types after loading and calculate XP to next level if missing
-                 this.state.tasks.forEach(t => {
-                    t.baseTime = Number(t.baseTime || 0);
-                    t.bestTime = t.bestTime ? Number(t.bestTime) : null;
-                 });
-                 this.state.userStats.forEach(s => {
-                     s.level = Number(s.level || 1);
-                     s.xp = Number(s.xp || 0);
-                     // Recalculate XP to next level on load to ensure it's correct based on current config
-                     s.xpToNextLevel = this.calculateXpToNextLevel(s.level);
-                 });
-                 // Ensure general stats has coins
-                 this.state.generalStats.coins = Number(this.state.generalStats.coins || 0);
 
-                 // Clean up any invalid cardToUseOnNext entries (e.g., if task was deleted)
-                 const validTaskIds = new Set(this.state.tasks.map(t => t.id));
-                 Object.keys(this.state.cardToUseOnNext).forEach(taskId => {
-                     if (!validTaskIds.has(taskId)) {
-                         delete this.state.cardToUseOnNext[taskId];
-                     }
-                 });
+                // Ensure numeric types & calculations post-load
+                this.state.tasks.forEach(t => {
+                    t.baseTime = Number(t.baseTime || 10); // Ensure minimum time
+                    t.bestTime = t.bestTime ? Number(t.bestTime) : null;
+                    t.xpReward = Number(t.xpReward || this.config.baseXpPerTask);
+                });
+                this.state.userStats.forEach(s => {
+                    s.level = Number(s.level || 1);
+                    s.xp = Number(s.xp || 0);
+                    s.xpToNextLevel = this.calculateXpToNextLevel(s.level);
+                });
+                this.state.rewardPool.forEach(r => {
+                    r.weight = Number(r.weight || 5);
+                });
+                this.state.generalStats.coins = Number(this.state.generalStats.coins || 0);
+
+                const validTaskIds = new Set(this.state.tasks.map(t => t.id));
+                Object.keys(this.state.cardToUseOnNext).forEach(taskId => {
+                    if (!validTaskIds.has(taskId)) delete this.state.cardToUseOnNext[taskId];
+                });
+                this.state.lootboxes = []; // Always start empty (legacy, but will be overwritten if saved lootboxes exist)
             }
 
+            loadLootboxes() {
+                try {
+                    const saved = localStorage.getItem('habitGameLootboxes');
+                    if (saved) {
+                        this.state.lootboxes = JSON.parse(saved);
+                        console.log('Lootboxes loaded from storage.');
+                    } else {
+                        this.state.lootboxes = [];
+                    }
+                } catch (e) {
+                    console.warn('Failed to load lootboxes:', e);
+                    this.state.lootboxes = [];
+                }
+            }
+
+            saveLootboxes() {
+                try {
+                    localStorage.setItem('habitGameLootboxes', JSON.stringify(this.state.lootboxes));
+                    console.log('Lootboxes saved.');
+                } catch (e) {
+                    console.warn('Failed to save lootboxes:', e);
+                }
+            }
+    
             saveState() {
-                 // Filter out temporary runtime state like activeTask timerId before saving
-                 const stateToSave = {
+                const stateToSave = {
                     tasks: this.state.tasks,
                     inventory: this.state.inventory,
                     generalStats: this.state.generalStats,
                     userStats: this.state.userStats,
                     activePenalty: this.state.activePenalty,
-                    cardToUseOnNext: this.state.cardToUseOnNext, // Save card selections
-                 };
-                localStorage.setItem('habitGameState_v2', JSON.stringify(stateToSave));
+                    cardToUseOnNext: this.state.cardToUseOnNext,
+                    rewardPool: this.state.rewardPool
+                };
+                try {
+                    localStorage.setItem('habitGameState_v2', JSON.stringify(stateToSave));
+                    console.log("State saved.");
+                } catch (e) {
+                     console.error("Failed to save state:", e);
+                     alert("Error saving game progress! Local storage might be full or disabled.");
+                }
             }
 
             // --- Stat Management ---
             addStat() {
                 const name = this.dom.newStatName.value.trim();
-                if (!name) {
-                    alert('Please enter a name for the stat.');
-                    return;
-                }
+                if (!name) { alert('Please enter a name for the stat.'); return; }
                 if (this.state.userStats.some(stat => stat.name.toLowerCase() === name.toLowerCase())) {
-                    alert('A stat with this name already exists.');
-                    return;
+                    alert('A stat with this name already exists.'); return;
                 }
-
                 const newStat = {
                     id: `stat_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                    name: name,
-                    level: 1,
-                    xp: 0,
-                    xpToNextLevel: this.calculateXpToNextLevel(1)
+                    name: name, level: 1, xp: 0, xpToNextLevel: this.calculateXpToNextLevel(1)
                 };
                 this.state.userStats.push(newStat);
                 this.dom.newStatName.value = '';
-                this.saveState();
-                this.render(); // Re-render to update UI including task dropdown
-                
+                this.saveState(); this.render();
             }
-
             deleteStat(statId) {
                 const statIndex = this.state.userStats.findIndex(s => s.id === statId);
                 if (statIndex === -1) return;
                 const statName = this.state.userStats[statIndex].name;
-
-                if (confirm(`Are you sure you want to delete the stat "${statName}"? Tasks linked to it will no longer grant XP for it.`)) {
+                if (confirm(`Delete stat "${statName}"? Tasks linked to it lose XP association.`)) {
                     this.state.userStats.splice(statIndex, 1);
-                    // Update tasks linked to this stat
-                    this.state.tasks.forEach(task => {
-                        if (task.statId === statId) {
-                            task.statId = null; // Or remove property: delete task.statId;
-                             
-                        }
-                    });
-                    this.saveState();
-                    this.render();
-                    
+                    this.state.tasks.forEach(task => { if (task.statId === statId) task.statId = null; });
+                    this.saveState(); this.render();
                 }
             }
-
             calculateXpToNextLevel(level) {
-                 // XP_for_level = Base * Multiplier^(Level - 1)
                  return Math.floor(this.config.statBaseXpForLevel2 * Math.pow(this.config.statXpLevelMultiplier, level - 1));
             }
-
             addXpToStat(statId, amount) {
-                 if (!statId || amount <= 0) return;
-                 const stat = this.state.userStats.find(s => s.id === statId);
-                 if (!stat) {
-                     console.warn(`Attempted to add XP to non-existent stat ID: ${statId}`);
-                     return;
-                 }
-
-                 
-                 stat.xp += amount;
-                 let leveledUp = false;
-                 let needsSave = true; // Assume save is needed unless only display updates
-
-                 // Check for level ups
-                 while (stat.xp >= stat.xpToNextLevel) {
-                     stat.xp -= stat.xpToNextLevel;
-                     stat.level++;
-                     stat.xpToNextLevel = this.calculateXpToNextLevel(stat.level);
-                     leveledUp = true;
-                     
-                     // Consider showing a more noticeable level-up notification
-                     // For now, alert is functional:
-                     alert(`${stat.name} reached Level ${stat.level}!`);
-                 }
-
-                 if (leveledUp) {
-                    this.saveState(); // Save state only if a level up occurred
-                    this.renderUserStats(); // Re-render the whole stats list if level changed
-                 } else if (amount > 0) {
-                    // Optimization: If only XP changed within the level, just update that specific stat's display
-                    this.renderSpecificUserStat(statId);
-                    // Small optimization: Could defer saveState() until task completion if needed,
-                    // but saving here ensures progress isn't lost if browser crashes mid-task.
-                    this.saveState();
-                 }
+                if (!statId || amount <= 0) return;
+                const stat = this.state.userStats.find(s => s.id === statId);
+                if (!stat) { console.warn(`Stat ID not found: ${statId}`); return; }
+                stat.xp += amount;
+                let leveledUp = false;
+                while (stat.xp >= stat.xpToNextLevel) {
+                    stat.xp -= stat.xpToNextLevel; stat.level++;
+                    stat.xpToNextLevel = this.calculateXpToNextLevel(stat.level);
+                    leveledUp = true;
+                    // Consider a less intrusive notification system later
+                    alert(`${stat.name} reached Level ${stat.level}!`);
+                }
+                // Save state regardless of level up, as XP changed
+                this.saveState();
+                // Render only if necessary
+                if (leveledUp) this.renderUserStats();
+                else this.renderSpecificUserStat(statId); // Update just the one stat bar/text
             }
 
-
-            // --- Core Game Logic ---
+             // --- Task Management ---
             addTask() {
                 const name = this.dom.newTaskName.value.trim();
                 const baseTimeInput = this.dom.newTaskTime.value;
-                const selectedStatId = this.dom.newTaskStat.value || null; // Get selected stat ID
-                const description = document.getElementById('new-task-desc').value.trim();
-                const xpInput = document.getElementById('new-task-xp').value;
-                const xpReward = parseInt(xpInput, 10);
+                const selectedStatId = this.dom.newTaskStat.value || null;
+                const description = this.dom.newTaskDesc.value.trim();
+                const xpInput = this.dom.newTaskXp.value;
 
-                if (!name) {
-                     alert('Please provide a task name.');
-                     return;
-                }
-                if (!baseTimeInput) {
-                     alert('Please provide a task time.');
-                     return;
-                }
-
+                if (!name || !baseTimeInput) { alert('Task name and time are required.'); return; }
                 const baseTime = parseInt(baseTimeInput, 10);
-
-                if (isNaN(baseTime) || baseTime < 10) {
-                    alert('Please provide a valid time (minimum 10 seconds).');
-                    return;
-                }
+                if (isNaN(baseTime) || baseTime < 10) { alert('Minimum time is 10 seconds.'); return; }
+                const xpReward = parseInt(xpInput, 10);
 
                 const newTask = {
                     id: `task_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                    name: name,
-                    description: description,
-                    baseTime: baseTime,
-                    xpReward: isNaN(xpReward) ? this.config.baseXpPerTask : xpReward,
-                    bestTime: null,
-                    statId: selectedStatId // Store the linked stat ID
+                    name, description, baseTime,
+                    xpReward: isNaN(xpReward) || xpReward < 0 ? this.config.baseXpPerTask : xpReward,
+                    bestTime: null, statId: selectedStatId
                 };
                 this.state.tasks.push(newTask);
-                this.dom.newTaskName.value = '';
-                this.dom.newTaskTime.value = '';
-                this.dom.newTaskStat.value = ''; // Reset dropdown
-                document.getElementById('new-task-desc').value = '';
-                this.saveState();
-                this.renderTasks(); // Only render tasks list
-                
+                this.dom.newTaskName.value = ''; this.dom.newTaskTime.value = '';
+                this.dom.newTaskStat.value = ''; this.dom.newTaskDesc.value = ''; this.dom.newTaskXp.value = '';
+                this.dom.addTaskPopup.classList.add('hidden');
+                this.saveState(); this.render();
             }
-
             deleteTask(taskId) {
                 if (this.state.activeTask && this.state.activeTask.taskId === taskId) {
-                    alert("Cannot delete a task while it's running!");
-                    return;
+                    alert("Cannot delete a running task!"); return;
                 }
-                 const taskIndex = this.state.tasks.findIndex(task => task.id === taskId);
-                 if (taskIndex === -1) return; // Task not found
-
-                 const taskName = this.state.tasks[taskIndex].name;
-
-                 if (confirm(`Are you sure you want to delete the task "${taskName}"?`)) {
+                const taskIndex = this.state.tasks.findIndex(task => task.id === taskId);
+                if (taskIndex === -1) return;
+                const taskName = this.state.tasks[taskIndex].name;
+                if (confirm(`Delete task "${taskName}"?`)) {
                     this.state.tasks.splice(taskIndex, 1);
-                    delete this.state.cardToUseOnNext[taskId]; // Remove any pending card selection
+                    delete this.state.cardToUseOnNext[taskId];
                     this.saveState();
-                    this.renderTasks(); // Only render tasks list
-                    
-                 }
+                    // Only render the tasks list for efficiency? Or full render? Full render safer.
+                    this.render();
+                }
             }
-
             selectCardForTask(cardId, taskId) {
-                const card = this.state.inventory.find(c => c.id === cardId);
-                const task = this.state.tasks.find(t => t.id === taskId);
-                if (!card || !task) return;
-
-                // Clear any existing selection for this task
-                Object.keys(this.state.cardToUseOnNext).forEach(key => {
-                     if (key === taskId) delete this.state.cardToUseOnNext[key];
-                });
+                 const card = this.state.inventory.find(c => c.id === cardId);
+                 const task = this.state.tasks.find(t => t.id === taskId);
+                 if (!card || !task || card.type === 'LOOTBOX_REWARD') {
+                     console.warn("Cannot select card/task:", card, task);
+                     return; // Invalid selection
+                 }
+                 // Unselect card if it was selected for another task
+                 Object.keys(this.state.cardToUseOnNext).forEach(key => {
+                    if(this.state.cardToUseOnNext[key] === cardId) {
+                        delete this.state.cardToUseOnNext[key];
+                    }
+                 });
+                 // Select card for this task
                  this.state.cardToUseOnNext[taskId] = cardId;
-                 // No saveState here - selection is temporary until task starts or another selection is made
-                 this.renderTasks(); // Re-render tasks to show "(Card Ready)"
-                 this.renderInventory(); // Might want to disable the button for the selected card
-                 alert(`Card "${card.name}" ready for the next run of task "${task.name}". Start the task to use it.`);
+                 this.renderInventory(false); // Re-render inventory to show selection
+                 this.renderTasks(false); // Re-render tasks to potentially show "(Card Ready)" although we removed that text
+                 // No saveState here - selection confirmed when task starts
+                 alert(`Card "${card.name}" ready for task "${task.name}". Start the task to use it.`);
             }
 
-            startTask(taskId) {
-                if (this.state.activeTask) {
-                    alert('Another task is already running!');
+            // --- Reward Pool Management ---
+            addReward() {
+                const name = this.dom.newRewardName.value.trim();
+                const weightInput = this.dom.newRewardWeight.value;
+                if (!name || !weightInput) { alert('Reward name and pleasurability score required.'); return; }
+                const weight = parseInt(weightInput, 10);
+                if (isNaN(weight) || weight < 1 || weight > 10) { alert('Pleasurability must be 1-10.'); return; }
+                const newReward = {
+                    id: `reward_${Date.now()}_${Math.random().toString(16).slice(2)}`, name, weight
+                };
+                this.state.rewardPool.push(newReward);
+                this.dom.newRewardName.value = ''; this.dom.newRewardWeight.value = '';
+                this.dom.addRewardPopup.classList.add('hidden');
+                this.saveState();
+                this.renderRewardPool();
+                this.renderStore(); // Clear generated boxes if pool changes
+            }
+            deleteReward(rewardId) {
+                const rewardIndex = this.state.rewardPool.findIndex(r => r.id === rewardId);
+                if (rewardIndex === -1) return;
+                const rewardName = this.state.rewardPool[rewardIndex].name;
+                if (confirm(`Remove "${rewardName}" from the reward pool?`)) {
+                    this.state.rewardPool.splice(rewardIndex, 1);
+                    this.saveState();
+                    this.renderRewardPool();
+                    this.renderStore(); // Clear generated boxes
+                }
+            }
+            renderRewardPool() {
+                this.dom.rewardPoolList.innerHTML = '';
+                const poolSize = this.state.rewardPool.length;
+                const rewardsPerBox = this.config.rewardsPerLootbox;
+
+                if (poolSize === 0) {
+                    this.dom.rewardPoolList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">Add rewards to the pool.</li>';
+                    this.dom.rewardPoolStatus.textContent = 'Pool empty. Add rewards.';
+                    this.dom.generateLootboxesBtn.disabled = true;
                     return;
                 }
-                const task = this.state.tasks.find(t => t.id === taskId);
-                if (!task) return;
+                const sortedRewards = [...this.state.rewardPool].sort((a,b) => a.name.localeCompare(b.name));
+                sortedRewards.forEach(reward => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <span>${reward.name} (Pleasure: ${reward.weight})</span>
+                        <button class="delete delete-reward-btn" data-reward-id="${reward.id}" title="Remove Reward">×</button>
+                    `;
+                    this.dom.rewardPoolList.appendChild(li);
+                });
 
-                this.timerSound.currentTime = 0;
-                this.timerSound.volume = 0;
-                this.timerSound.play().catch(() => {});
+                const isValidSize = poolSize > 0 && poolSize % rewardsPerBox === 0;
+                this.dom.generateLootboxesBtn.disabled = !isValidSize;
+                if (isValidSize) {
+                    this.dom.rewardPoolStatus.textContent = `Pool size: ${poolSize} (Valid for generation - Multiple of ${rewardsPerBox}).`;
+                } else {
+                    const remainder = poolSize % rewardsPerBox;
+                    const neededToAdd = rewardsPerBox - remainder;
+                    this.dom.rewardPoolStatus.textContent = `Pool size: ${poolSize}. Need ${neededToAdd} more for a multiple of ${rewardsPerBox}.`;
+                }
+            }
 
-                let timeLimit = task.baseTime;
-                let cardUsed = null;
-                const cardIdToUse = this.state.cardToUseOnNext[taskId];
-                let cardDef = null; // Define cardDef outside the if block
+            // --- Lootbox Generation & Store ---
+            generateLootboxes() {
+                 const poolSize = this.state.rewardPool.length;
+                 const rewardsPerBox = this.config.rewardsPerLootbox;
+                 const numBoxes = this.config.numberOfLootboxes;
+                 const requiredSize = numBoxes * rewardsPerBox;
 
-                // 1. Apply Active Penalty (if any affects the *next* task)
-if (this.state.activePenalty && this.state.activePenalty.nextTask) {
-    const penaltyDef = this.penaltyTypes.find(p => p.type === this.state.activePenalty.type);
-    if (penaltyDef?.effect) {
-        const originalTime = timeLimit;
-        timeLimit = Math.max(10, Math.floor(penaltyDef.effect(timeLimit)));
-        
-        alert(`Penalty applied: ${this.state.activePenalty.name}\n${this.state.activePenalty.description}\nTime reduced from ${originalTime}s to ${timeLimit}s`);
-    }
-    this.state.activePenalty = null; // Consumed
-    // saveState will happen later, renderActivePenalty will be called by full render
-}
-
-                // 2. Apply Selected Reward Card
-                 if (cardIdToUse) {
-                    const cardIndex = this.state.inventory.findIndex(c => c.id === cardIdToUse);
-                    if (cardIndex > -1) {
-                        cardUsed = { ...this.state.inventory[cardIndex] }; // Store a copy
-                        cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type); // Assign cardDef here
-
-                        if (cardDef?.effect) { // Time modification
-                            const originalTime = timeLimit;
-                            timeLimit = Math.max(10, Math.floor(cardDef.effect(timeLimit)));
-                             
-                        } else { // Other effects (multipliers, insurance) handled at completion
-                             
-                        }
-
-                        this.state.inventory.splice(cardIndex, 1); // Consume card
-                        delete this.state.cardToUseOnNext[taskId]; // Clear selection state
-                        // saveState will happen later, renderInventory will be called by full render
-                    } else {
-                         console.warn(`Card ID ${cardIdToUse} selected but not found in inventory.`);
-                         delete this.state.cardToUseOnNext[taskId]; // Clear invalid selection
-                    }
+                 if (poolSize === 0 || poolSize % rewardsPerBox !== 0) {
+                     alert(`Reward pool size (${poolSize}) must be a multiple of ${rewardsPerBox}.`);
+                     return;
+                 }
+                 if (poolSize < requiredSize) {
+                     alert(`Need at least ${requiredSize} rewards for ${numBoxes} boxes of ${rewardsPerBox}. Current: ${poolSize}.`);
+                     return;
                  }
 
-                // Store initial time limit for progress bar calculation
-                const initialTimeLimitForBar = timeLimit;
+                this.state.lootboxes = [];
+                const rewardsCopy = [...this.state.rewardPool];
+                const n = this.config.lootboxBasePrice;
 
-                this.state.activeTask = {
-                    taskId: task.id,
-                    startTime: Date.now(),
-                    timerId: null,
-                    timeLimit: timeLimit, // Current time limit after modifications
-                    initialTimeLimit: initialTimeLimitForBar, // Time limit used for progress bar %
-                    cardUsed: cardUsed // Store the used card details
-                };
+                for (let i = 0; i < numBoxes; i++) {
+                    const lootboxRewards = [];
+                    if (rewardsCopy.length < rewardsPerBox) break; // Safeguard
 
-                this.dom.taskRunnerName.textContent = `Running: ${task.name}`;
-                // Visibility toggled by render()
-
-                this.runTimer();
-                this.saveState(); // Save state now (includes consumed penalty/card, active task details minus timerId)
-                this.render(); // Full render to update UI state (hide sections, disable buttons, show timer)
+                    for (let j = 0; j < rewardsPerBox; j++) {
+                        const randomIndex = Math.floor(Math.random() * rewardsCopy.length);
+                        lootboxRewards.push(rewardsCopy.splice(randomIndex, 1)[0]);
+                    }
+                    let price = (i === 0) ? n : (i === 1) ? n * 2 : (n * 2) * 2; // 100, 200, 400
+                    this.state.lootboxes.push({
+                        id: `lootbox_${i}_${Date.now()}`, name: `Lootbox ${i + 1}`, price, rewards: lootboxRewards
+                    });
+                }
+                console.log("Generated Lootboxes:", this.state.lootboxes);
+                this.saveLootboxes();
+                this.renderStore();
+                alert(`${numBoxes} lootboxes generated!`);
             }
-
-            runTimer() {
-                if (!this.state.activeTask) return;
-                // Destructure directly from this.state.activeTask for safety if it becomes null
-                const { timerId } = this.state.activeTask;
-                if (timerId) clearInterval(timerId); // Clear previous interval if any (safety)
-
-                const intervalId = setInterval(() => {
-                    // Check if task is still active inside interval, crucial for async safety
-                    if (!this.state.activeTask) {
-                        clearInterval(intervalId);
-                        
-                        return;
-                    }
-                    const { startTime, timeLimit, initialTimeLimit } = this.state.activeTask;
-
-                    const elapsed = (Date.now() - startTime) / 1000;
-                    const remaining = Math.max(0, timeLimit - elapsed);
-                    // Progress based on the initial time limit when the timer started
-                    const progress = initialTimeLimit > 0 ? Math.max(0, Math.min(100, (remaining / initialTimeLimit) * 100)) : 0;
-
-                    this.updateTimerDisplay(remaining, progress);
-
-                    if (remaining <= 0) {
-                        // Task time ran out naturally
-                        
-                        // Clear interval *before* calling completeTask to prevent race conditions
-                        clearInterval(intervalId);
-                        this.state.activeTask.timerId = null; // Update state
-                        this.completeTask(false); // Time ran out = failure
-                    }
-                }, 100); // Update ~10 times per second
-
-                // Update the activeTask state with the new timerId
-                if (this.state.activeTask) {
-                   this.state.activeTask.timerId = intervalId;
-                } else {
-                   // If activeTask became null between start and here, clear the just-created interval
-                   clearInterval(intervalId);
-                   console.warn("Active task became null immediately after timer creation.");
+            renderStore() {
+                this.dom.lootboxList.innerHTML = '';
+                if (this.state.lootboxes.length === 0) {
+                    this.dom.lootboxList.innerHTML = '<p>No lootboxes generated. Add rewards (multiple of 3) and generate.</p>';
+                    return;
                 }
+                this.state.lootboxes.forEach(lootbox => {
+                    const div = document.createElement('div');
+                    div.classList.add('lootbox-item');
+                    div.innerHTML = `
+                        <h3>${lootbox.name}</h3>
+                        <p>Price: ${lootbox.price} <span title="Coins">🪙</span></p>
+                        <button class="buy-lootbox-btn" data-lootbox-id="${lootbox.id}">Buy</button>
+                    `;
+                    this.dom.lootboxList.appendChild(div);
+                });
             }
-
-            updateTimerDisplay(remainingSeconds, progressPercent) {
-                const minutes = Math.floor(remainingSeconds / 60);
-                const seconds = Math.floor(remainingSeconds % 60);
-                this.dom.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-                // Fade in timer sound volume as time decreases
-                const fadeDuration = 100; // seconds
-                let volume = 0;
-                if (remainingSeconds < fadeDuration) {
-                    volume = 1 - (remainingSeconds / fadeDuration);
-                    volume = Math.min(Math.max(volume, 0), 1);
-                }
-                this.timerSound.volume = volume;
-
-                // Update bar width
-                this.dom.timerBar.style.width = `${progressPercent}%`;
-
-                // Update bar color based on progress (optional gradient effect stays)
-                if (progressPercent < 25) {
-                    this.dom.timerBar.style.background = 'var(--color-danger)';
-                } else if (progressPercent < 50) {
-                    this.dom.timerBar.style.background = 'var(--color-warning)';
-                } else {
-                    // Reset to default gradient if needed, or keep single color
-                     this.dom.timerBar.style.background = 'linear-gradient(90deg, var(--color-success) 0%, var(--accent-primary) 100%)';
-                }
-            }
-
-            completeTask(success) {
-                this.timerSound.pause();
-                this.timerSound.currentTime = 0;
-                if (success) {
-                    this.winSound.currentTime = 0;
-                    this.winSound.play().catch(() => {});
-                } else {
-                    this.loseSound.currentTime = 0;
-                    this.loseSound.play().catch(() => {});
-                }
-
-                if (!this.state.activeTask) {
-                     console.warn("completeTask called but no active task found.");
-                     return;
-                }
-
-                const { taskId, startTime, timerId, cardUsed } = this.state.activeTask;
-                if(timerId) clearInterval(timerId); // Ensure timer is stopped
-
-                const task = this.state.tasks.find(t => t.id === taskId);
-                if (!task) {
-                     console.error(`Task with ID ${taskId} not found during completion.`);
-                     this.state.activeTask = null; // Clear broken active task state
-                     this.saveState();
-                     this.render();
-                     return;
-                }
-
-                const timeTaken = Math.max(0, (Date.now() - startTime) / 1000); // Ensure non-negative time
-
-                // --- Rewards & Penalties ---
-                let finalCoins = 0;
-                let finalStatXp = 0;
-                let message = '';
-
-                if (success) {
-                    // --- Success Logic ---
-                    const baseCoins = this.config.baseCoinsPerTask;
-                    const baseXp = this.config.baseXpPerTask; // Base XP for the *stat*
-
-                    let coinMultiplier = 1;
-                    let xpMultiplier = 1;
-
-                    // Apply card multipliers
-                    if (cardUsed) {
-                         const cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type);
-                         if (cardDef?.multiplier) {
-                            coinMultiplier = cardDef.multiplier.coins || coinMultiplier;
-                            xpMultiplier = cardDef.multiplier.xp || xpMultiplier; // Stat XP multiplier
-                            
-                         }
-                    }
-
-                    // Calculate Performance Tier & Bonus
-                    const baseTaskTime = task.baseTime;
-                    let tier = 'Bronze'; // Default tier
-                    let bonusCoins = 0;
-                    let bonusXp = 0; // Bonus Stat XP
-
-                    // Tier calculation based on time taken relative to base time
-                    if (timeTaken < baseTaskTime * 0.5) { tier = 'Gold'; bonusCoins = 20; bonusXp = 30; }
-                    else if (timeTaken < baseTaskTime * 0.75) { tier = 'Silver'; bonusCoins = 10; bonusXp = 15; }
-                    else { tier = 'Bronze'; bonusCoins = 5; bonusXp = 5; } // Base Bronze bonus
-
-                    // Apply multipliers to bonuses as well
-                    bonusCoins = Math.floor(bonusCoins * coinMultiplier);
-                    bonusXp = Math.floor(bonusXp * xpMultiplier);
-
-                    // Calculate final amounts
-                    finalCoins = Math.floor(baseCoins * coinMultiplier) + bonusCoins;
-                    finalStatXp = Math.floor(baseXp * xpMultiplier) + bonusXp;
-
-                    // Grant rewards
-                    this.state.generalStats.coins += finalCoins;
-                    if (task.statId && finalStatXp > 0) {
-                        this.addXpToStat(task.statId, finalStatXp); // This handles its own rendering/saving for the stat part
-                    } else if (finalStatXp > 0) {
-                        
-                    }
-
-                    // Update Best Time
-                    if (task.bestTime === null || timeTaken < task.bestTime) {
-                        task.bestTime = timeTaken;
-                        
-                    }
-
-                    // Grant random reward card on success
-                    this.grantRandomRewardCard();
-
-                    // Prepare success message
-                    message = `Task Success! (${tier})\nTime: ${timeTaken.toFixed(1)}s\nEarned: +${finalCoins} Coins, +${finalStatXp} Stat XP.`;
-                    
-
-
-                } else {
-                     // --- Failure Logic ---
-                    let penaltyApplied = true;
-                    let failureMessage = `Task Failed! Time: ${timeTaken.toFixed(1)}s.`;
-
-                    if (cardUsed && cardUsed.type === 'INSURANCE') {
-                        failureMessage += '\nInsurance Policy used: Penalty negated.';
-                        
-                        penaltyApplied = false;
-                         // Optionally grant a small consolation prize even with insurance?
-                         // const consolationCoins = Math.floor(this.config.baseCoinsPerTask * 0.2);
-                         // this.state.generalStats.coins += consolationCoins;
-                         // failureMessage += `\n+${consolationCoins} consolation coins.`;
-                    }
-
-                    if (penaltyApplied) {
-                         // Apply penalty and get its description for the message
-                         const penaltyDescription = this.applyRandomPenalty(taskId); // Pass taskId for 'Let It Ride'
-                         if (penaltyDescription) {
-                             failureMessage += `\nPenalty: ${penaltyDescription}`;
-                         } else {
-                             failureMessage += "\nNo penalty applied (e.g., no cards to lose).";
-                         }
-                    }
-                    message = failureMessage;
-                }
-
-                // Cleanup
-                this.state.activeTask = null;
-
-                // Save state *after* all modifications from success/failure are done
-                this.saveState();
-                // Render the UI to reflect the changes (hide timer, show sections, update stats/inventory)
-                this.render();
-
-                // Show result message *after* render to ensure UI is updated
-                 if (message) {
-                    alert(message);
+            buyLootbox(lootboxId) {
+                 const lootbox = this.state.lootboxes.find(lb => lb.id === lootboxId);
+                 if (!lootbox) { alert("Error: Lootbox not found."); return; }
+                 if (this.state.generalStats.coins < lootbox.price) {
+                     alert(`Not enough coins! Need ${lootbox.price} 🪙, have ${this.state.generalStats.coins} 🪙.`); return;
                  }
-            }
+                 this.state.generalStats.coins -= lootbox.price;
+                 this.coinSound.play().catch(()=>{});
 
-            grantRandomRewardCard() {
-                 if (this.rewardCardTypes.length === 0) return; // No cards defined
+                 // Weighted Random Selection (Lower Pleasurability = Higher Chance)
+                 let totalInverseWeight = lootbox.rewards.reduce((sum, r) => sum + Math.max(1, 11 - r.weight), 0); // Ensure weight >= 1
+                 if (totalInverseWeight <= 0) totalInverseWeight = lootbox.rewards.length; // Fallback
 
-                 const randomCardType = this.rewardCardTypes[Math.floor(Math.random() * this.rewardCardTypes.length)];
+                 let randomRoll = Math.random() * totalInverseWeight;
+                 let selectedReward = lootbox.rewards[lootbox.rewards.length - 1]; // Default fallback
+                 for (const reward of lootbox.rewards) {
+                     const effectiveWeight = Math.max(1, 11 - reward.weight);
+                     randomRoll -= effectiveWeight;
+                     if (randomRoll <= 0) {
+                         selectedReward = reward; break;
+                     }
+                 }
+
+                 this.openBoxSound.play().catch(()=>{});
                  const newCard = {
-                    id: `card_${Date.now()}_${Math.random().toString(16).slice(2)}`,
-                    ...randomCardType // Spread properties from the type definition
+                     id: `card_${Date.now()}_${Math.random().toString(16).slice(2)}`,
+                     type: 'LOOTBOX_REWARD', name: selectedReward.name, emoji: '🎁',
+                     description: `From ${lootbox.name}. Click to Burn.` // Updated description
                  };
                  this.state.inventory.push(newCard);
-                 
-                 // No save/render needed here, called within completeTask which handles it
-                 // Optional: Show a less intrusive notification than alert
-                 // e.g., append a temporary message to a notifications area
-            }
+                 alert(`Opened ${lootbox.name}, received: ${selectedReward.name}!`);
+                 this.saveState(); this.render();
+             }
 
-            applyRandomPenalty(failedTaskId = null) {
-                const possiblePenalties = this.penaltyTypes;
-                if (possiblePenalties.length === 0) return null; // No penalties defined
+            // --- Core Game Logic ---
+             startTask(taskId) {
+                 if (this.state.activeTask) { alert('Task already running!'); return; }
+                 const task = this.state.tasks.find(t => t.id === taskId);
+                 if (!task) return;
+                 this.timerSound.currentTime = 0; this.timerSound.volume = 0; this.timerSound.play().catch(() => {});
+                 let timeLimit = task.baseTime;
+                 let cardUsed = null; const cardIdToUse = this.state.cardToUseOnNext[taskId];
+                 let activePenaltySnapshot = null;
 
-                const penalty = { ...possiblePenalties[Math.floor(Math.random() * possiblePenalties.length)] }; // Get a copy
-                
-                let appliedDescription = `${penalty.name}! ${penalty.description}`; // Base description
-
-                if (penalty.immediate) {
-                    if (penalty.type === 'BAD_BEAT') {
-                        if (this.state.inventory.length > 0) {
-                            const removedIndex = Math.floor(Math.random() * this.state.inventory.length);
-                            const removedCard = this.state.inventory.splice(removedIndex, 1)[0];
-                            appliedDescription += ` Lost: ${removedCard.name}`;
-                            
-                            // RenderInventory will be handled by the calling completeTask function's final render
-                        } else {
-                             appliedDescription += ' (Inventory empty, no card lost).';
-                             
-                        }
-                    } else if (penalty.type === 'LET_IT_RIDE' && failedTaskId) {
-                        appliedDescription += ' Retrying task immediately.';
-                        
-                        // Use setTimeout to allow the current execution context (completeTask) to finish
-                        // before starting the new task. This prevents potential state issues.
-                        setTimeout(() => {
-                             
-                             this.startTask(failedTaskId);
-                        }, 50); // Small delay
-                         // No state save here, startTask will handle it.
-                         // Return description, the retry happens after this function returns.
-                         return appliedDescription;
+                 // Apply Active Penalty (if any for next task)
+                 if (this.state.activePenalty && this.state.activePenalty.nextTask) {
+                    activePenaltySnapshot = {...this.state.activePenalty}; // Snapshot before consuming
+                    const penaltyDef = this.penaltyTypes.find(p => p.type === activePenaltySnapshot.type);
+                    if (penaltyDef?.effect) {
+                        const originalTime = timeLimit;
+                        timeLimit = Math.max(10, Math.floor(penaltyDef.effect(timeLimit)));
+                        alert(`Penalty Applied: ${activePenaltySnapshot.name}\nTime reduced from ${originalTime}s to ${timeLimit}s`);
+                    } else {
+                         alert(`Penalty Active: ${activePenaltySnapshot.name}\n${activePenaltySnapshot.description}`); // Acknowledge non-time penalties
                     }
-                    // If immediate penalty applied something, return description
-                    return appliedDescription;
+                    this.state.activePenalty = null; // Consume penalty
+                 }
 
-                } else if (penalty.nextTask) {
-                    this.state.activePenalty = penalty; // Store the penalty object
-                    
-                    // renderActivePenalty will be handled by completeTask's final render
-                    return appliedDescription; // Return description to be shown in alert
-                }
+                 // Apply Selected Reward Card
+                 if (cardIdToUse) {
+                     const cardIndex = this.state.inventory.findIndex(c => c.id === cardIdToUse);
+                     if (cardIndex > -1) {
+                         cardUsed = { ...this.state.inventory[cardIndex] };
+                         const cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type);
+                         if (cardDef?.effect) { timeLimit = Math.max(10, Math.floor(cardDef.effect(timeLimit))); }
+                         this.state.inventory.splice(cardIndex, 1); // Consume card
+                         delete this.state.cardToUseOnNext[taskId]; // Clear selection state
+                     } else { delete this.state.cardToUseOnNext[taskId]; } // Clear invalid selection
+                 }
+                 const initialTimeLimitForBar = timeLimit;
+                 this.state.activeTask = {
+                     taskId: task.id, startTime: Date.now(), timerId: null,
+                     timeLimit, initialTimeLimit: initialTimeLimitForBar, cardUsed, activePenaltySnapshot
+                 };
+                 this.dom.taskRunnerName.textContent = `Running: ${task.name}`;
+                 this.runTimer();
+                 this.saveState(); this.render(); // Full render to update UI state
+             }
+             runTimer() {
+                 if (!this.state.activeTask) return; const { timerId } = this.state.activeTask; if (timerId) clearInterval(timerId);
+                 const intervalId = setInterval(() => {
+                     if (!this.state.activeTask) { clearInterval(intervalId); return; } // Task ended/cancelled
+                     const { startTime, timeLimit, initialTimeLimit } = this.state.activeTask;
+                     const elapsed = (Date.now() - startTime) / 1000; const remaining = Math.max(0, timeLimit - elapsed);
+                     const progress = initialTimeLimit > 0 ? Math.max(0, Math.min(100, (remaining / initialTimeLimit) * 100)) : 0;
+                     this.updateTimerDisplay(remaining, progress);
+                     if (remaining <= 0) { clearInterval(intervalId); this.state.activeTask.timerId = null; this.completeTask(false); } // Time ran out
+                 }, 100); // Update 10 times/sec
+                 if (this.state.activeTask) this.state.activeTask.timerId = intervalId; else clearInterval(intervalId); // Handle immediate cancellation case
+             }
+             updateTimerDisplay(remainingSeconds, progressPercent) {
+                 const minutes = Math.floor(remainingSeconds / 60); const seconds = Math.floor(remainingSeconds % 60);
+                 this.dom.timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                 const fadeDuration = 30; let volume = 0; if (remainingSeconds < fadeDuration) { volume = Math.min(1, Math.max(0, 1 - (remainingSeconds / fadeDuration))); } this.timerSound.volume = volume * 0.4; // Adjusted volume
+                 this.dom.timerBar.style.width = `${progressPercent}%`;
+                 this.dom.timerBar.style.background = progressPercent < 25 ? 'var(--color-danger)' : progressPercent < 50 ? 'var(--color-warning)' : 'linear-gradient(90deg, var(--color-success) 0%, var(--accent-primary) 100%)';
+             }
+             completeTask(success) {
+                 this.timerSound.pause(); this.timerSound.currentTime = 0;
+                 if (success) this.winSound.play().catch(()=>{}); else this.loseSound.play().catch(()=>{});
+                 if (!this.state.activeTask) return;
+                 const { taskId, startTime, timerId, cardUsed, activePenaltySnapshot } = this.state.activeTask;
+                 if (timerId) clearInterval(timerId);
+                 const task = this.state.tasks.find(t => t.id === taskId);
+                 if (!task) { this.state.activeTask = null; this.saveState(); this.render(); return; } // Task deleted mid-run?
 
-                // Should not reach here if penalty types are correctly defined
-                console.warn("Penalty type not handled:", penalty.type);
-                return null; // Return null if no specific action taken
-            }
+                 const timeTaken = Math.max(0, (Date.now() - startTime) / 1000);
+                 let finalCoins = 0; let finalStatXp = 0; let message = '';
+                 let penaltyMultiplier = activePenaltySnapshot?.penaltyMultiplier || { coins: 1, xp: 1 };
+                 let applyCurseOfDoubt = activePenaltySnapshot?.special === 'curseOfDoubt';
+                 let doubleNextPenaltyOnFailure = activePenaltySnapshot?.special === 'doubleTrouble';
+
+                 if (success) {
+                     const baseCoins = this.config.baseCoinsPerTask;
+                     const baseStatXp = task.xpReward;
+                     let coinMultiplier = 1; let xpMultiplier = 1;
+                     if (cardUsed) {
+                         const cardDef = this.rewardCardTypes.find(ct => ct.type === cardUsed.type);
+                         if (cardDef?.multiplier) { coinMultiplier *= (cardDef.multiplier.coins || 1); xpMultiplier *= (cardDef.multiplier.xp || 1); }
+                         if (cardDef?.special === 'luckyStreak' && Math.random() < 0.25) { coinMultiplier *= 2; xpMultiplier *= 2; message += "🍀 Lucky Streak! Rewards doubled!\n"; }
+                     }
+                     coinMultiplier *= penaltyMultiplier.coins; xpMultiplier *= penaltyMultiplier.xp; // Apply penalty reductions
+                     const baseTaskTime = task.baseTime; let tier = 'Bronze'; let bonusCoins = 0; let bonusXp = 0;
+                     if (timeTaken < baseTaskTime * 0.5) { tier = 'Gold'; bonusCoins = 20; bonusXp = 30; }
+                     else if (timeTaken < baseTaskTime * 0.75) { tier = 'Silver'; bonusCoins = 10; bonusXp = 15; }
+                     else { tier = 'Bronze'; bonusCoins = 5; bonusXp = 5; }
+                     bonusCoins = Math.floor(bonusCoins * coinMultiplier); bonusXp = Math.floor(bonusXp * xpMultiplier);
+                     finalCoins = Math.max(0, Math.floor(baseCoins * coinMultiplier) + bonusCoins); // Ensure non-negative
+                     finalStatXp = Math.max(0, Math.floor(baseStatXp * xpMultiplier) + bonusXp); // Ensure non-negative
+
+                     if (applyCurseOfDoubt && Math.random() < 0.25) {
+                         finalCoins = 0; finalStatXp = 0; message += "🧿 Curse of Doubt! Rewards nullified!\n"; this.loseSound.play().catch(()=>{});
+                     }
+                     if (finalCoins > 0) this.state.generalStats.coins += finalCoins;
+                     if (task.statId && finalStatXp > 0) this.addXpToStat(task.statId, finalStatXp); // addXp handles save/render
+                     if (task.bestTime === null || timeTaken < task.bestTime) task.bestTime = timeTaken;
+                     if (!(applyCurseOfDoubt && finalCoins === 0 && finalStatXp === 0)) { // Grant card if not cursed
+                         this.grantRandomRewardCard(); message += "🎴 Random reward card gained!\n";
+                     }
+                     message += `✅ Success! (${tier})\nTime: ${timeTaken.toFixed(1)}s\n+${finalCoins}🪙, +${finalStatXp} XP`;
+                 } else {
+                     message = `❌ Failed! Time: ${timeTaken.toFixed(1)}s`;
+                     if (cardUsed?.special === 'insurance') { // Check for insurance card type
+                         message += '\n🛡️ Insurance used: Penalty negated.';
+                     } else {
+                         const penaltyDescription = this.applyRandomPenalty(taskId, doubleNextPenaltyOnFailure);
+                         message += penaltyDescription ? `\nPenalty: ${penaltyDescription}` : "\nNo penalty applied.";
+                     }
+                 }
+                 this.state.activeTask = null;
+                 this.saveState(); // Save after all updates
+                 this.render(); // Render after all updates
+                 alert(message); // Show result summary
+             }
+             grantRandomRewardCard() {
+                 if (this.rewardCardTypes.length === 0) return;
+                 const randomCardType = this.rewardCardTypes[Math.floor(Math.random() * this.rewardCardTypes.length)];
+                 const newCard = { id: `card_${Date.now()}_${Math.random().toString(16).slice(2)}`, ...randomCardType };
+                 this.state.inventory.push(newCard);
+                  // Save/render handled by completeTask
+             }
+             applyRandomPenalty(failedTaskId = null, doubleEffect = false) {
+                  const possiblePenalties = this.penaltyTypes;
+                  if (possiblePenalties.length === 0) return null;
+                  const penalty = { ...possiblePenalties[Math.floor(Math.random() * possiblePenalties.length)] };
+                  let appliedDescription = `${penalty.name}! ${penalty.description}`;
+                  let effectMultiplier = doubleEffect ? 2 : 1;
+
+                  if (penalty.immediate) {
+                      if (penalty.type === 'BAD_BEAT') {
+                          const cardsToLose = Math.min(this.state.inventory.length, effectMultiplier);
+                          if (cardsToLose > 0) {
+                               let lostNames = [];
+                               for(let i = 0; i < cardsToLose; i++) {
+                                   if (this.state.inventory.length === 0) break; // Stop if somehow inventory empty mid-loop
+                                   const removedIndex = Math.floor(Math.random() * this.state.inventory.length);
+                                   lostNames.push(this.state.inventory.splice(removedIndex, 1)[0].name);
+                               }
+                               appliedDescription += ` Lost: ${lostNames.join(', ')}`;
+                               if(doubleEffect && cardsToLose > 1) appliedDescription += " (Effect Doubled!)";
+                          } else { appliedDescription += ' (Inventory empty).'; }
+                          // Save state handled by completeTask caller
+                      } else if (penalty.type === 'LET_IT_RIDE' && failedTaskId) {
+                           appliedDescription += ' Retrying task immediately.';
+                           if(doubleEffect) appliedDescription += " (Double Trouble forced!)";
+                           setTimeout(() => { this.startTask(failedTaskId); }, 50);
+                           return appliedDescription; // Return now, retry is async
+                      }
+                  } else if (penalty.nextTask) {
+                      if (doubleEffect) {
+                          appliedDescription += " (Effect Doubled!)";
+                          if(penalty.effect) { // Modify time effects (approximate doubling)
+                              if (penalty.type === 'TIME_CRUNCH') penalty.effect = (limit) => limit * 0.56; // 0.75^2
+                              else if (penalty.type === 'BEAT_THE_CLOCK') penalty.effect = (limit) => Math.max(10, limit - 30);
+                              else if (penalty.type === 'TIME_BOMB') penalty.effect = (limit) => limit * 0.64; // 0.8^2
+                          }
+                          if(penalty.penaltyMultiplier) { // Modify reward multipliers
+                               if(penalty.penaltyMultiplier.coins === 0.5) penalty.penaltyMultiplier.coins = 0.25; // 0.5^2
+                               if(penalty.penaltyMultiplier.xp === 0.5) penalty.penaltyMultiplier.xp = 0.25;
+                           }
+                           if(penalty.type === 'CURSE_OF_DOUBT') penalty.description += " (Now 50% chance!)"; // Modify description, logic in completeTask
+                           if(penalty.type === 'DOUBLE_TROUBLE') appliedDescription += " Warning: Stacking double trouble!"; // Just flavor
+                      }
+                       this.state.activePenalty = penalty;
+                       // Save state handled by completeTask caller
+                  } else { console.warn("Unhandled penalty type:", penalty.type); return null; }
+
+                  return appliedDescription; // Return description for the alert
+             }
 
             // --- UI Rendering ---
             render() {
-                
-                const isTaskActive = !!this.state.activeTask;
+                 // console.log("Rendering UI..."); // Reduce console noise
+                 const isTaskActive = !!this.state.activeTask;
 
-                // Render static/list parts first
-                this.renderGeneralStats();
-                this.renderUserStats(); // Render the new stats section
-                this.populateStatDropdown(); // Ensure dropdown is up-to-date
-                this.renderTasks(isTaskActive); // Pass active state to disable buttons correctly
-                this.renderInventory(isTaskActive); // Pass active state
-                this.renderActivePenalty(isTaskActive); // Pass active state
-                this.renderProducts();
+                 this.renderGeneralStats();
+                 this.renderUserStats();
+                 this.populateStatDropdown();
+                 this.renderTasks(isTaskActive);
+                 this.renderInventory(isTaskActive); // Handles direct click rendering
+                 this.renderActivePenalty(isTaskActive);
+                 this.renderRewardPool();
+                 this.renderStore();
 
-                // Toggle main section visibility based on whether a task is active
-                this.dom.taskManagement.classList.toggle('hidden', isTaskActive);
-                this.dom.inventorySection.classList.toggle('hidden', isTaskActive);
-                this.dom.userStatsSection.classList.toggle('hidden', isTaskActive);
-                this.dom.taskRunner.classList.toggle('hidden', !isTaskActive);
+                 // Toggle section visibility
+                 this.dom.taskManagement.classList.toggle('hidden', isTaskActive);
+                 this.dom.inventorySection.classList.toggle('hidden', isTaskActive);
+                 this.dom.userStatsSection.classList.toggle('hidden', isTaskActive);
+                 this.dom.rewardPoolSection.classList.toggle('hidden', isTaskActive);
+                 this.dom.storeSection.classList.toggle('hidden', isTaskActive);
+                 this.dom.taskRunner.classList.toggle('hidden', !isTaskActive);
 
-                 // Ensure specific elements within task runner are reset/updated if needed
-                 if (!isTaskActive) {
-                    // Reset timer display when no task is active
-                    this.updateTimerDisplay(0, 100); // Show 00:00, full bar (or hide bar)
+                 if (!isTaskActive) this.updateTimerDisplay(0, 100); // Reset timer display
+
+                 if(isTaskActive) { // Ensure popups are hidden if task starts while open
+                    this.dom.addTaskPopup.classList.add('hidden');
+                    this.dom.addRewardPopup.classList.add('hidden');
                  }
             }
-
-            renderGeneralStats() {
-                 // Added Base Stat XP display
-                 this.dom.generalStatsDisplay.textContent = `Coins: ${this.state.generalStats.coins} | Base Stat XP: ${this.config.baseXpPerTask}`;
-            }
-
+            renderGeneralStats() { this.dom.generalStatsDisplay.textContent = `Coins: ${this.state.generalStats.coins} 🪙 | Base Stat XP: ${this.config.baseXpPerTask}`; }
             renderUserStats() {
-                this.dom.userStatsList.innerHTML = ''; // Clear list
-                if (this.state.userStats.length === 0) {
-                    // Use a more informative placeholder if needed, or keep simple
-                    this.dom.userStatsList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No stats created yet. Add one below.</li>';
-                    return;
-                }
-                // Sort stats alphabetically for consistency
-                const sortedStats = [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name));
-                sortedStats.forEach(stat => {
-                    this.appendOrUpdateStatElement(stat);
-                });
-
-                // Send stats to spider graph iframe
-                const spiderGraphIframe = document.getElementById('spider-graph-iframe');
-                if (spiderGraphIframe && spiderGraphIframe.contentWindow) {
-                    const statsForGraph = this.state.userStats.map(stat => ({
-                        name: stat.name,
-                        level: stat.level
-                    }));
-                    spiderGraphIframe.contentWindow.postMessage({
-                        type: 'updateSpiderGraph',
-                        stats: statsForGraph
-                    }, '*');
-                }
+                this.dom.userStatsList.innerHTML = '';
+                if (this.state.userStats.length === 0) { this.dom.userStatsList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No stats created yet.</li>'; return; }
+                [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name))
+                                      .forEach(stat => this.appendOrUpdateStatElement(stat));
             }
-
             renderSpecificUserStat(statId) {
-                 const stat = this.state.userStats.find(s => s.id === statId);
-                 if(stat) {
-                    this.appendOrUpdateStatElement(stat);
-                 } else {
-                    console.warn(`Tried to render specific stat ${statId}, but it was not found.`);
-                 }
+                const stat = this.state.userStats.find(s => s.id === statId); if(stat) this.appendOrUpdateStatElement(stat);
             }
-
-                         // Helper to add or update a single stat's list item (for efficiency)
             appendOrUpdateStatElement(stat) {
                 let li = this.dom.userStatsList.querySelector(`li[data-stat-id="${stat.id}"]`);
-                const xpProgress = stat.xpToNextLevel > 0 ? Math.round((stat.xp / stat.xpToNextLevel) * 100) : (stat.level > 1 ? 100 : 0);
-
-                const statDetailsHTML = `
-                    <div class="stat-card">
-                        <button data-stat-id="${stat.id}" class="delete-stat-btn" ${this.state.activeTask ? 'disabled' : ''} title="Delete Stat ${stat.name}">&times;</button>
-                        <div class="stat-details-container">
-                            <div class="stat-level">Lvl ${stat.level}</div>
-                            <div class="stat-name">${stat.name}</div>
-                            <div class="stat-xp">(${stat.xp} / ${stat.xpToNextLevel} XP - ${xpProgress}%)</div>
-                            <div class="xp-bar">
-                                <div class="xp-bar-fill" style="width: ${xpProgress}%;"></div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-
-                if (li) {
-                    li.innerHTML = statDetailsHTML;
-                    const button = li.querySelector('.delete-stat-btn');
-                    if (button) button.disabled = !!this.state.activeTask;
-                } else {
-                    li = document.createElement('li');
-                    li.dataset.statId = stat.id;
-                    li.innerHTML = statDetailsHTML;
-                    this.dom.userStatsList.appendChild(li);
-                }
+                const xpProgress = stat.xpToNextLevel > 0 ? Math.min(100, Math.round((stat.xp / stat.xpToNextLevel) * 100)) : (stat.level > 1 ? 100 : 0);
+                const statDetailsHTML = `<div class="stat-card"><button data-stat-id="${stat.id}" class="delete delete-stat-btn" ${this.state.activeTask ? 'disabled' : ''} title="Delete Stat ${stat.name}">×</button><div class="stat-details-container"><div class="stat-level">Lvl ${stat.level}</div><div class="stat-name">${stat.name}</div><div class="stat-xp">(${stat.xp} / ${stat.xpToNextLevel} XP - ${xpProgress}%)</div><div class="xp-bar"><div class="xp-bar-fill" style="width: ${xpProgress}%;"></div></div></div></div>`;
+                if (li) { li.innerHTML = statDetailsHTML; const button = li.querySelector('.delete-stat-btn'); if (button) button.disabled = !!this.state.activeTask; }
+                else { li = document.createElement('li'); li.dataset.statId = stat.id; li.innerHTML = statDetailsHTML; this.dom.userStatsList.appendChild(li); }
             }
-
-            renderTasks(isTaskActive) { // Accept active state as parameter
-                this.dom.taskList.innerHTML = ''; // Clear list
-                if (this.state.tasks.length === 0) {
-                    this.dom.taskList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No tasks added yet.</li>';
-                    return;
-                }
-
-                // Sort tasks alphabetically
-                 const sortedTasks = [...this.state.tasks].sort((a, b) => a.name.localeCompare(b.name));
-
-                sortedTasks.forEach(task => {
-                    const li = document.createElement('li');
-                    li.dataset.taskId = task.id; // Add task id to li for easier selection if needed later
-
+            renderTasks(isTaskActive) {
+                this.dom.taskList.innerHTML = '';
+                if (this.state.tasks.length === 0) { this.dom.taskList.innerHTML = '<li style="justify-content: center; color: var(--text-secondary); font-style: italic;">No tasks added yet.</li>'; return; }
+                [...this.state.tasks].sort((a, b) => a.name.localeCompare(b.name))
+                                    .forEach(task => {
+                    const li = document.createElement('li'); li.dataset.taskId = task.id;
                     const linkedStat = task.statId ? this.state.userStats.find(s => s.id === task.statId) : null;
-                    const linkedStatName = linkedStat ? linkedStat.name : 'None';
-                    const cardReadyText = this.state.cardToUseOnNext[task.id] ? ' (Card Ready)' : '';
-                    const bestTimeText = task.bestTime ? ` - Best: ${task.bestTime.toFixed(1)}s` : '';
-                    const descriptionText = task.description ? `<div class="task-desc">${task.description}</div>` : '';
-
-                    li.innerHTML = `
-                        <div class="task-card-content">
-                          <div class="task-info">
-                            <div class="task-name">${task.name}</div>
-                            <div class="task-time">Time: ${task.baseTime}s</div>
-                            ${bestTimeText ? `<div class="task-best-time">${bestTimeText}</div>` : ''}
-                            <div class="task-desc">${descriptionText}</div>
-                          </div>
-                          <div class="task-actions">
-                            <button data-task-id="${task.id}" class="delete delete-task-btn" ${isTaskActive ? 'disabled' : ''} title="Delete Task ${task.name}">&#10006;</button>
-                            <button data-task-id="${task.id}" class="start-task-btn" ${isTaskActive ? 'disabled' : ''} title="Start Task ${task.name}${cardReadyText}">&#9654;</button>
-                          </div>
-                        </div>
-                    `;
+                    const linkedStatName = linkedStat ? ` | Stat: ${linkedStat.name}` : '';
+                    // Removed cardReadyText as it's shown on the card now
+                    const bestTimeText = task.bestTime ? `Best: ${task.bestTime.toFixed(1)}s` : 'No best time';
+                    const descText = task.description ? `<div class="task-desc">${task.description}</div>` : '';
+                    li.innerHTML = `<div class="task-card-content"><div class="task-info"><div class="task-name">${task.name}</div><div class="task-time">Time: ${task.baseTime}s | ${bestTimeText}${linkedStatName}</div>${descText}</div><div class="task-actions"><button data-task-id="${task.id}" class="delete delete-task-btn" ${isTaskActive ? 'disabled' : ''} title="Delete Task">✖</button><button data-task-id="${task.id}" class="start-task-btn" ${isTaskActive ? 'disabled' : ''} title="Start Task">▶</button></div></div>`;
                     this.dom.taskList.appendChild(li);
                 });
-                 // Note: Disabling is handled directly in the HTML string now, no need for separate loop
             }
-
             populateStatDropdown() {
-                const select = this.dom.newTaskStat;
-                const currentVal = select.value; // Preserve selection if possible
-
-                // Clear existing options except the "None" option
-                while (select.options.length > 1) {
-                     select.remove(1);
-                }
-                select.options[0].textContent = "None"; // Ensure first option text is correct
-
-                 // Sort stats alphabetically for the dropdown
-                const sortedStats = [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name));
-
-                sortedStats.forEach(stat => {
-                    const option = document.createElement('option');
-                    option.value = stat.id;
-                    option.textContent = stat.name; // Use textContent for safety
-                    select.appendChild(option);
-                });
-
-                // Try to restore previous selection if it still exists
-                if (Array.from(select.options).some(opt => opt.value === currentVal)) {
-                    select.value = currentVal;
-                } else {
-                    select.value = ""; // Default to "None" if previous selection is gone
-                }
+                const select = this.dom.newTaskStat; const currentVal = select.value;
+                while (select.options.length > 1) { select.remove(1); } select.options[0].textContent = "None";
+                [...this.state.userStats].sort((a, b) => a.name.localeCompare(b.name))
+                                        .forEach(stat => { const option = document.createElement('option'); option.value = stat.id; option.textContent = stat.name; select.appendChild(option); });
+                select.value = Array.from(select.options).some(opt => opt.value === currentVal) ? currentVal : "";
             }
-
-
-            renderInventory(isTaskActive) { // Accept active state
-                this.dom.inventoryList.innerHTML = ''; // Clear list
-
+            renderInventory(isTaskActive) { // UPDATED for Direct Click Interaction
+                this.dom.inventoryList.innerHTML = '';
                 if (this.state.inventory.length === 0) {
                     this.dom.inventoryEmpty.classList.remove('hidden');
-                    this.dom.inventoryList.classList.add('hidden'); // Hide the UL itself
+                    this.dom.inventoryList.classList.add('hidden'); // Hide UL if empty
                     return;
                 }
-
                 this.dom.inventoryEmpty.classList.add('hidden');
-                this.dom.inventoryList.classList.remove('hidden');
+                this.dom.inventoryList.classList.remove('hidden'); // Show UL
 
-                // Sort inventory alphabetically by card name
                 const sortedInventory = [...this.state.inventory].sort((a, b) => a.name.localeCompare(b.name));
 
                 sortedInventory.forEach(card => {
                     const li = document.createElement('li');
                     li.dataset.cardId = card.id;
+                    li.classList.add('clickable-card'); // For CSS and event handling
+                    if (isTaskActive) li.classList.add('disabled');
 
-                    // Check if this card is currently selected for *any* task
+                    const isLootboxReward = card.type === 'LOOTBOX_REWARD';
+                    let emoji = card.emoji || (isLootboxReward ? '🎁' : '🎴');
                     const isSelected = Object.values(this.state.cardToUseOnNext).includes(card.id);
-                    const buttonText = isSelected ? "Selected" : "Select for Task";
-                    // Disable button if task is active OR if this card is already selected
-                    const isDisabled = isTaskActive || isSelected;
 
-                    // Determine emoji: use card.emoji if exists, else lookup from reward or penalty types
-                    let emoji = card.emoji;
-                    if (!emoji) {
-                      const rewardType = this.rewardCardTypes.find(t => t.type === card.type);
-                      const penaltyType = this.penaltyTypes.find(t => t.type === card.type);
-                      emoji = (rewardType && rewardType.emoji) || (penaltyType && penaltyType.emoji) || '🎴';
-                    }
+                    if (isSelected && !isTaskActive) li.classList.add('selected-for-task');
 
                     li.innerHTML = `
                         <div class="card-container">
@@ -1095,190 +1143,209 @@ if (this.state.activePenalty && this.state.activePenalty.nextTask) {
                                 <span class="card-name">${card.name}</span>
                                 <em class="card-desc">${card.description}</em>
                             </div>
+                            ${isSelected ? '<span class="card-status">Selected</span>' : ''}
                         </div>
                     `;
                     this.dom.inventoryList.appendChild(li);
                 });
             }
-
-             renderActivePenalty(isTaskActive) { // Accept active state
-                 // Show penalty info only if a penalty is active for the *next* task AND no task is currently running
-                 const shouldShowPenalty = this.state.activePenalty && this.state.activePenalty.nextTask && !isTaskActive;
-
-                 if (shouldShowPenalty) {
-                    this.dom.activePenaltyDisplay.textContent = `Active: ${this.state.activePenalty.description}`;
-                    this.dom.activePenaltySection.classList.remove('hidden');
-                } else {
-                    this.dom.activePenaltySection.classList.add('hidden');
-                }
+            handleBurnCard(cardId) {
+                 const cardIndex = this.state.inventory.findIndex(c => c.id === cardId);
+                 if (cardIndex === -1) return;
+                 const cardName = this.state.inventory[cardIndex].name;
+                 if (confirm(`Burn the prize: "${cardName}"? Cannot be undone.`)) {
+                     this.state.inventory.splice(cardIndex, 1);
+                     this.burnSound.play().catch(()=>{});
+                     this.saveState();
+                     this.renderInventory(!!this.state.activeTask); // Re-render only inventory
+                     alert(`"${cardName}" burned.`);
+                 }
             }
-
+            renderActivePenalty(isTaskActive) {
+                 const shouldShowPenalty = this.state.activePenalty && this.state.activePenalty.nextTask && !isTaskActive;
+                 this.dom.activePenaltyDisplay.textContent = shouldShowPenalty ? `Next Task Penalty: ${this.state.activePenalty.description}` : '';
+                 this.dom.activePenaltySection.classList.toggle('hidden', !shouldShowPenalty);
+            }
 
             // --- Event Binding ---
             bindEvents() {
+                // Popups
+                this.dom.showAddTaskPopup.addEventListener('click', () => this.dom.addTaskPopup.classList.toggle('hidden'));
+                this.dom.closeAddTaskPopup.addEventListener('click', () => this.dom.addTaskPopup.classList.add('hidden'));
+                this.dom.showAddRewardPopup.addEventListener('click', () => this.dom.addRewardPopup.classList.toggle('hidden'));
+                this.dom.closeAddRewardPopup.addEventListener('click', () => this.dom.addRewardPopup.classList.add('hidden'));
+
+                // Add Buttons
                 this.dom.addTaskBtn.addEventListener('click', () => this.addTask());
-                this.dom.addStatBtn.addEventListener('click', () => this.addStat()); // Bind add stat button
+                this.dom.addStatBtn.addEventListener('click', () => this.addStat());
+                this.dom.addRewardBtn.addEventListener('click', () => this.addReward());
 
-                // Hover sound for inventory cards
-                this.dom.inventoryList.addEventListener('mouseover', (event) => {
-                    const cardContainer = event.target.closest('.card-container');
-                    if (cardContainer && this.dom.inventoryList.contains(cardContainer)) {
-                        this.hoverSound.currentTime = 0;
-                        this.hoverSound.play().catch(() => {});
-                    }
+                // Deletion (Delegation)
+                this.dom.userStatsList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button.delete-stat-btn');
+                    if (btn && !btn.disabled) this.deleteStat(btn.dataset.statId);
+                });
+                this.dom.rewardPoolList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button.delete-reward-btn');
+                    if (btn && !btn.disabled) this.deleteReward(btn.dataset.rewardId);
+                });
+                this.dom.taskList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button.delete-task-btn');
+                    if (btn && !btn.disabled) this.deleteTask(btn.dataset.taskId);
                 });
 
-                // Hover sound for product list
-                this.dom.productList.addEventListener('mouseover', (event) => {
-                    const productItem = event.target.closest('li');
-                    if (productItem && this.dom.productList.contains(productItem)) {
-                        this.hoverSound.currentTime = 0;
-                        this.hoverSound.play().catch(() => {});
-                    }
+                // Task Starting (Delegation)
+                this.dom.taskList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button.start-task-btn');
+                    if (btn && !btn.disabled) this.startTask(btn.dataset.taskId);
                 });
 
-                // Event delegation for dynamic lists (more efficient)
-                this.dom.taskList.addEventListener('click', (event) => {
-                    const target = event.target.closest('button'); // Find the button clicked or its parent button
-                    if (!target) return; // Exit if click wasn't on or inside a button
-
-                    const taskId = target.dataset.taskId;
-                    if (!taskId) return; // Exit if button has no task-id
-
-                    if (target.classList.contains('start-task-btn')) {
-                         this.startTask(taskId);
-                    } else if (target.classList.contains('delete-task-btn')) {
-                         this.deleteTask(taskId);
-                    }
+                // Lootbox Actions
+                this.dom.generateLootboxesBtn.addEventListener('click', () => {
+                    if(!this.dom.generateLootboxesBtn.disabled) this.generateLootboxes();
+                 });
+                this.dom.lootboxList.addEventListener('click', (e) => {
+                    const btn = e.target.closest('button.buy-lootbox-btn');
+                    if (btn && !btn.disabled) this.buyLootbox(btn.dataset.lootboxId);
                 });
 
-                this.dom.inventoryList.addEventListener('click', (event) => {
-                    const cardContainer = event.target.closest('.card-container');
-                    if (!cardContainer) return;
-
-                    const li = cardContainer.closest('li');
-                    if (!li) return;
-
-                    const cardId = li.dataset.cardId;
+                // Inventory Card Clicking (Delegation) - REPLACES previous button logic
+                 this.dom.inventoryList.addEventListener('click', (event) => {
+                    const targetCardElement = event.target.closest('li.clickable-card');
+                    if (!targetCardElement || this.state.activeTask || targetCardElement.classList.contains('disabled')) {
+                         // console.log("Inventory click ignored."); // Reduce noise
+                         return;
+                    }
+                    const cardId = targetCardElement.dataset.cardId;
                     if (!cardId) return;
-
-                    if (this.state.tasks.length === 0) {
-                        alert("Add a task first before selecting a card!");
-                        return;
-                    }
-
                     const card = this.state.inventory.find(c => c.id === cardId);
+                    if (!card) return;
 
-                    const modal = document.getElementById('card-task-modal');
-                    const taskListDiv = document.getElementById('card-task-list');
-                    const cancelBtn = document.getElementById('cancel-card-task-btn');
+                    if (card.type === 'LOOTBOX_REWARD') this.handleBurnCard(cardId);
+                    else this.showTaskSelectionModal(cardId); // Use on task
+                 });
 
-                    // Clear previous list
-                    taskListDiv.innerHTML = '';
+                // Card Task Selection Modal
+                this.dom.cancelCardTaskBtn.addEventListener('click', () => this.dom.cardTaskModal.classList.add('hidden'));
+                this.dom.cardTaskModal.addEventListener('click', (e) => { // Close on overlay click
+                     if (e.target === this.dom.cardTaskModal) this.dom.cardTaskModal.classList.add('hidden');
+                 });
 
-                    // Add task buttons
-                    this.state.tasks.forEach((task) => {
-                        const btn = document.createElement('button');
-                        btn.textContent = task.name;
-                        btn.style.width = '100%';
-                        btn.addEventListener('click', () => {
-                            this.selectCardForTask(cardId, task.id);
-                            modal.classList.add('hidden');
-                        });
-                        taskListDiv.appendChild(btn);
-                    });
+                // Task Runner Buttons
+                this.dom.completeTaskEarlyBtn.addEventListener('click', () => { if (this.state.activeTask) this.completeTask(true); });
+                this.dom.failTaskBtn.addEventListener('click', () => { if (this.state.activeTask && confirm('Manually fail task? Penalties apply.')) this.completeTask(false); });
 
-                    // Add unselect button
+                 // Hover sound for inventory cards
+                 this.dom.inventoryList.addEventListener('mouseover', (event) => {
+                     const cardElement = event.target.closest('li.clickable-card');
+                     if (cardElement && !cardElement.classList.contains('disabled') && this.dom.inventoryList.contains(cardElement)) {
+                         this.hoverSound.currentTime = 0; this.hoverSound.play().catch(()=>{});
+                     }
+                 });
+            }
+
+            // Helper for showing task selection modal
+            showTaskSelectionModal(cardId) {
+                const card = this.state.inventory.find(c => c.id === cardId);
+                 if (!card || card.type === 'LOOTBOX_REWARD') { alert("This card type cannot be used on tasks."); return; }
+                 if (this.state.tasks.length === 0) { alert("Add a task first!"); return; }
+
+                 const modal = this.dom.cardTaskModal;
+                 const taskListDiv = this.dom.cardTaskList;
+                 taskListDiv.innerHTML = '';
+
+                 // Add task buttons
+                 this.state.tasks.forEach((task) => {
+                     const btn = document.createElement('button');
+                     btn.textContent = task.name;
+                     btn.addEventListener('click', () => {
+                         this.selectCardForTask(cardId, task.id);
+                         modal.classList.add('hidden');
+                     });
+                     taskListDiv.appendChild(btn);
+                 });
+
+                 // Add unselect button if card is currently selected
+                 const currentSelectionTaskId = Object.keys(this.state.cardToUseOnNext).find(taskId => this.state.cardToUseOnNext[taskId] === cardId);
+                 if(currentSelectionTaskId) {
+                    const taskName = this.state.tasks.find(t=>t.id === currentSelectionTaskId)?.name || 'Unknown Task';
                     const unselectBtn = document.createElement('button');
-                    unselectBtn.textContent = 'Unselect Card';
-                    unselectBtn.style.width = '100%';
+                    unselectBtn.textContent = `Unselect from: ${taskName}`;
                     unselectBtn.style.background = '#777';
+                    unselectBtn.style.marginTop = '5px';
                     unselectBtn.addEventListener('click', () => {
-                        Object.keys(this.state.cardToUseOnNext).forEach(taskId => {
-                            if (this.state.cardToUseOnNext[taskId] === cardId) {
-                                delete this.state.cardToUseOnNext[taskId];
-                                
-                            }
-                        });
-                        this.renderTasks();
-                        this.renderInventory();
+                        delete this.state.cardToUseOnNext[currentSelectionTaskId];
+                        this.renderInventory(false); // Update UI
+                        this.renderTasks(false);
                         modal.classList.add('hidden');
                     });
                     taskListDiv.appendChild(unselectBtn);
+                 }
 
-                    // Show modal
-                    modal.classList.remove('hidden');
+                 modal.classList.remove('hidden'); // Show modal
+            }
 
-                    // Cancel button closes modal
-                    cancelBtn.onclick = () => {
-                        modal.classList.add('hidden');
-                    };
-                });
+            // --- Section Visibility Persistence ---
+            loadSectionVisibility() {
+                try {
+                    const saved = localStorage.getItem('habitGameSectionVisibility');
+                    return saved ? JSON.parse(saved) : {};
+                } catch (e) {
+                    console.warn('Failed to load section visibility:', e);
+                    return {};
+                }
+            }
 
-                // Bind delete stat buttons using delegation
-                this.dom.userStatsList.addEventListener('click', (event) => {
-                    const target = event.target.closest('button.delete-stat-btn');
-                     if (target) {
-                         this.deleteStat(target.dataset.statId);
-                     }
-                });
+            saveSectionVisibility() {
+                try {
+                    localStorage.setItem('habitGameSectionVisibility', JSON.stringify(this.sectionVisibility));
+                } catch (e) {
+                    console.warn('Failed to save section visibility:', e);
+                }
+            }
 
-                // Task Runner Buttons
-                this.dom.completeTaskEarlyBtn.addEventListener('click', () => {
-                    if (this.state.activeTask) {
-                         this.completeTask(true);
+            addSectionToggles() {
+                const sections = document.querySelectorAll('.section');
+                sections.forEach(section => {
+                    const header = section.querySelector('h2');
+                    const content = section.querySelector('.section-content');
+                    if (!header || !content) return;
+
+                    const toggleBtn = document.createElement('button');
+                    toggleBtn.textContent = '▼';
+                    toggleBtn.style.float = 'right';
+                    toggleBtn.style.fontSize = '1em';
+                    toggleBtn.style.marginLeft = '10px';
+                    toggleBtn.style.background = 'none';
+                    toggleBtn.style.border = 'none';
+                    toggleBtn.style.cursor = 'pointer';
+                    toggleBtn.style.color = 'var(--text-secondary)';
+
+                    const sectionId = section.id;
+                    if (this.sectionVisibility[sectionId]) {
+                        content.classList.add('hidden');
+                        toggleBtn.textContent = '►';
                     }
-                });
-                this.dom.failTaskBtn.addEventListener('click', () => {
-                    if (this.state.activeTask && confirm('Manually fail this task? This will trigger failure penalties (unless insured).')) {
-                         this.completeTask(false);
-                    }
-                });
 
-                this.dom.addProductBtn.addEventListener('click', () => this.addProduct());
+                    toggleBtn.addEventListener('click', () => {
+                        const isHidden = content.classList.toggle('hidden');
+                        toggleBtn.textContent = isHidden ? '►' : '▼';
+                        this.sectionVisibility[sectionId] = isHidden;
+                        this.saveSectionVisibility();
+                    });
 
-                this.dom.productList.addEventListener('click', (event) => {
-                    const target = event.target.closest('button.buy-product-btn');
-                    if (!target) return;
-
-                    const productId = target.dataset.productId;
-                    if (!productId) return;
-
-                    this.buyProduct(productId);
+                    header.appendChild(toggleBtn);
                 });
             }
-        }
+        } // End HabitGame Class
 
-        // Initialize
+        // Initialize Game on DOMContentLoaded
         document.addEventListener('DOMContentLoaded', () => {
-            window.habitGame = new HabitGame();
-
-            // Toggle Add Task Popup
-            const addTaskBtn = document.getElementById('show-add-task-popup');
-            const addTaskPopup = document.getElementById('add-task-popup');
-            const closeAddTaskBtn = document.getElementById('close-add-task-popup');
-
-            if (addTaskBtn && addTaskPopup && closeAddTaskBtn) {
-                addTaskBtn.addEventListener('click', () => {
-                    addTaskPopup.classList.toggle('hidden');
-                });
-                closeAddTaskBtn.addEventListener('click', () => {
-                    addTaskPopup.classList.add('hidden');
-                });
-            }
-
-            // Toggle Add Product Popup
-            const addProductBtn = document.getElementById('show-add-product-popup');
-            const addProductPopup = document.getElementById('add-product-popup');
-            const closeAddProductBtn = document.getElementById('close-add-product-popup');
-
-            if (addProductBtn && addProductPopup && closeAddProductBtn) {
-                addProductBtn.addEventListener('click', () => {
-                    addProductPopup.classList.toggle('hidden');
-                });
-                closeAddProductBtn.addEventListener('click', () => {
-                    addProductPopup.classList.add('hidden');
-                });
+            try {
+                window.habitGame = new HabitGame();
+            } catch (error) {
+                console.error("Failed to initialize HabitGame:", error);
+                document.body.innerHTML = `<div style="color: red; padding: 20px; border: 1px solid red; background: #330000;"><h2>Error Initializing Game</h2><p>There was a critical error and the game could not start. Please check the console (F12) for details.</p><pre>${error.stack || error}</pre></div>`;
             }
         });
     </script>
